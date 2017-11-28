@@ -16,19 +16,25 @@ def getinfo():
     with open(fname,'r') as f:
         for line in f.readlines():
             
-            if "Run time" in line or "sep=;" in line:
+            if "Run" in line or "sep=;" in line:
                 continue
+            
+                
             info=line.split(';');
+            
             session={}
-            session['pareto']=info[10]
-            session['nash']=info[11]
-            session['socialwelfare']=info[12]
+            session['pareto']=info[9]
+            session['nash']=info[10]
+            session['socialwelfare']=info[11]
             session['utilities']={}
-            for agentid in [1,3]:
+            for agentid in range(1,4):
                 agent=info[agentid+11].split('@')[0]
         
                 utility=info[agentid+14]
-                session['utilities'][agent]=utility
+                if agent in session['utilities'].keys():
+                 session['utilities'][agent]=str(float(session['utilities'][agent])+float(utility))
+                else:
+                    session['utilities'][agent]=utility
                 if agent not in agents:
                     agents.append(agent)
             log.append(session)
@@ -39,6 +45,7 @@ def getinfo():
 
 def process(log,agents):
     results={}
+    
     for agent in agents:
         results[agent]={'utility':0.0,'nash':0.0,'count':0,'normalized_utility':0.0, 'normalized_nash':0.0}
 
