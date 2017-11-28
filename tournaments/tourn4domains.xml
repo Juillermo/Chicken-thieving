@@ -11,21 +11,22 @@
 				classPath="negotiator.protocol.StackedAlternatingOffersProtocol"
 				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
 			<partyRepItems>
-				<party classPath="agents.anac.y2015.group2.Group2">
+				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2015.pokerface.PokerFace">
+				<party classPath="agents.anac.y2016.caduceus.Caduceus">
 					<properties />
 				</party>
 				<party
-					classPath="agents.anac.y2015.TUDMixedStrategyAgent.TUDMixedStrategyAgent">
+					classPath="agents.anac.y2016.parscat.ParsCat">
 					<properties />
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party1_utility.xml" />
-				<item url="file:etc/templates/partydomain/party2_utility.xml" />
-				<item url="file:etc/templates/partydomain/party3_utility.xml" />
+				<item url="file:etc/templates/ANAC2015/group1-university/University_util1.xml" />
+				<item url="file:etc/templates/ANAC2015/group1-university/University_util2.xml" />
+				<item url="file:etc/templates/ANAC2015/group1-university/University_util3.xml" />
+				<item url="file:etc/templates/ANAC2015/group1-university/University_util4.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>3</numberOfPartiesPerSession>

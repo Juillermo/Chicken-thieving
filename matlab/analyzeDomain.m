@@ -4,9 +4,7 @@ function [umax, umin, bid_space] = analyzeDomain(domain_dir, domain_file, domain
 % domain_file: name of the xml files (without number or .xml)
 % domain_nums: 1x3 vector of integers with which profiles are picked
 
-oldpath = path;
-% Add the path of your logs
-path([domain_dir], oldpath)
+addpath(domain_dir)
 
 profiles = cell(3,1);
 for i=1:3
@@ -21,10 +19,11 @@ weights = zeros(3, n_issues);
 n_items = zeros(n_issues, 1);
 issues = cell(n_issues, 1);
 weighted_issues = cell(n_issues, 1);
+
 for j=1:n_issues
     n_items(j) = size(profiles{1}(j).items, 1);
     issues{j} = zeros(3, n_items(j));
-   for i=1:3
+   for i=1:3 % agents
        for k=1:n_items(j)
         issues{j}(i, k) = profiles{i}(j).items(k).eval;
        end
@@ -36,7 +35,7 @@ for j=1:n_issues
    max_eval(max_eval == 0) = 1; % Avoid dividing by zero
    issues{j} = issues{j} ./ (max_eval * ones(1, n_items(j)));
    
-   weighted_issues{j} = issues{j} .* (weights(:,j) * ones(1,n_items(j)));
+   weighted_issues{j} = issues{j}  .*  ( weights(:,j) * ones(1, n_items(j)) );
    bid_space = bid_space * n_items(j);
 end
 

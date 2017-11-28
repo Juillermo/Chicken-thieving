@@ -13,10 +13,10 @@ function allCombinations(n_profiles, profiles_dir, profile_name)
 
     figure(2), clf
     dist_to_nash = permute([umax_comb(5,1,:), umax_comb(5,2,:), umax_comb(5,3,:), umin_comb(5,1,:)], [3 2 1]);
-    boxplot(dist_to_nash)
+    histogram([dist_to_nash(:,1); dist_to_nash(:,2); dist_to_nash(:,3)])
     dist_to_nash
     title('Distances to Nash of max utility points across all combinations')
-    xlabel('Max util point of 1st, 2nd, 3rd agent, and symmetric point')
+    xlabel('Max util point and symmetric point')
     ylabel('Distance to Nash')
     
     figure(3), clf
@@ -27,4 +27,6 @@ function allCombinations(n_profiles, profiles_dir, profile_name)
     ylabel('Second agent`s utility')
     zlabel('Third agent`s utility')
     axis([0 1 0 1 0 1])
+    
+    n_comb
 end
