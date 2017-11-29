@@ -11,11 +11,12 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'logs'];
-log_name = 'prueba2.csv';
+log_name = 'boa_prueba.csv';
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
     'etc/templates/ANAC2015/group2-new_sporthal';
+    'etc/templates/ANAC2016/AgentLightSmartGrid';
     };
 
 addpath(log_dir);
@@ -96,7 +97,7 @@ for i_tour = 1:n_tournaments
     agreements = sub_table.Agreement;
     n_agreements = 0;
     for i=1:n_sessions
-        if agreements{i} == 'Yes'
+        if strcmp( agreements{i}, 'Yes')
             n_agreements = n_agreements + 1;
         end
     end

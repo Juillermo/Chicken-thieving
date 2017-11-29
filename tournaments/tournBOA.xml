@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<multilateralTournamentsConfiguration>
+	<tournaments>
+		<tournament>
+			<deadline>
+				<value>180</value>
+				<type>TIME</type>
+			</deadline>
+			<protocolItem hasMediatorProfile="false" hasMediator="false"
+				description="Each agents makes offer, counter-offer, or accepts"
+				classPath="negotiator.protocol.StackedAlternatingOffersProtocol"
+				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
+			<partyRepItems>
+				<party classPath="agents.anac.y2015.cuhkagent2015.CUHKAgent2015">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2013.TheFawkes.TheFawkes">
+					<properties />
+				</party>
+				<party
+					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/BoaAgent.class">
+					<properties />
+				</party>
+			</partyRepItems>
+			<partyProfileItems>
+				<item url="file:etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util1.xml"/>
+                		<item url="file:etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util2.xml"/>
+                		<item url="file:etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util3.xml"/>
+			</partyProfileItems>
+			<repeats>1</repeats>
+			<numberOfPartiesPerSession>3</numberOfPartiesPerSession>
+			<repetitionAllowed>false</repetitionAllowed>
+			<persistentDataType>DISABLED</persistentDataType>
+		</tournament>
+	</tournaments>
+</multilateralTournamentsConfiguration>
