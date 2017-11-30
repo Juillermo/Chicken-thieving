@@ -49,7 +49,8 @@ public class NNash extends AbstractNegotiationParty {
    int phase3count;
    List<NashBidDetails> phase3bids;
 	List<NashBidDetails> nashbids;
-
+   double phase2at;
+   double phase3at;
 	ModelDomain md;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
@@ -79,7 +80,8 @@ public class NNash extends AbstractNegotiationParty {
         phase3count=0;
         phase3bids=null;
         md=new ModelDomain(info.getUtilitySpace());
-       
+        phase2at=0.5;
+        phase3at=0.6;
         
 	
 		
@@ -131,13 +133,14 @@ rounds++;
     		{System.out.println("last");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
     		}
-    	else if(time>0.9 && nashflag){
+    	else if(time>phase3at && nashflag){
     		b=phase3bid(rem);
+    		System.out.println("phase3");
     		
     	}
     	
     	
-    	else if(time>0.5 && ms[0].confident(100,5) && ms[1].confident(100,5))
+    	else if(time>phase2at && ms[0].confident(100,5) && ms[1].confident(100,5))
 		{
 		if(!nashflag)
 			{sortNash();nashflag=true;}
@@ -171,8 +174,21 @@ rounds++;
 
   
    public Bid phase3bid(int rem){
-	   if(phase3count==0 && rem<(md.getSize()/4))
-		   phase3bids=nashbids.subList(0, rem);
+	   if(phase3count==0 ){
+		  int i=0;
+		  phase3bids=new ArrayList<NashBidDetails>();
+		  
+		  while(i<rem){
+			  if(i<(md.getSize()/4))
+				  phase3bids.add(nashbids.get(i));
+			  else
+				  phase3bids.add(nashbids.get(i%4));
+			  i++;
+		  }
+		  Collections.sort(phase3bids,NashBidDetails.utComparator);
+	   }
+	  
+	   phase3count++;
 	   return phase3bids.get(phase3count).getBid();
    }
    
