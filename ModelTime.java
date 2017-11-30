@@ -32,7 +32,7 @@ public class ModelTime {
 		
 		double avgRoundTime = avgtime;
 		int remRounds = (int)Math.floor((1-time)/avgRoundTime);
-		System.out.println("remrounds "+remRounds);
+		System.out.println("\nBOA: Rounds remaining: "+ remRounds);
 		
 		 return remRounds;
 	 }

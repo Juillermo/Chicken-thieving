@@ -26,8 +26,8 @@ public class OMrepo{
 	  
 		models=new OpponentModel[2];
 		Map<String, Double> p= new HashMap<String,Double>();
-		String arg="l";
-		Double val=new Double(0.2);
+		String arg = "l";
+		Double val = new Double(0.2);
 		p.put(arg, val);
 		models[0]=new CUHKFrequencyModelV2();
 		models[0].init(ns,p);

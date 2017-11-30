@@ -2,6 +2,8 @@
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import negotiator.AgentID;
 import negotiator.Bid;
 import negotiator.actions.Action;
@@ -49,8 +51,8 @@ public class BoaAgent extends AbstractNegotiationParty {
 		b=new Atlas3();
 		b.init(info);
 		omr=new OMrepo(info);
-		models=omr.getModels();
-		ms=new ModelScore(info,models);
+		models = omr.getModels();
+		ms = new ModelScore(info, models);
 		MINIMUM_BID_UTILITY = utilitySpace.getReservationValueUndiscounted();
 		t=new ModelTime();
         sos=new SortedOutcomeSpace(info.getUtilitySpace());
@@ -75,7 +77,6 @@ public class BoaAgent extends AbstractNegotiationParty {
             // storing last received offer
             lastReceivedOffer = offer.getBid();
         }
-        
     };
 	
 
@@ -83,36 +84,35 @@ public class BoaAgent extends AbstractNegotiationParty {
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> classes) {
 		
-rounds++;
+		rounds++;
     	
     	double time = getTimeLine().getTime();
+    	System.out.println(time);
     	t.model(time);
     	Action action=null;
-    	if(t.getRemRounds(time)<=1)
-    		{System.out.println("last");
+    	if(t.getRemRounds(time) <=1 ){
+    		System.out.println("BOA: Last round!!");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
-    		}
+    	}
     		
-    	double thresh=getThresh(time,0.1,1,0);
+    	double thresh = getThresh(time,0.1,1,0);
     	
-    	
-    	misc.Range r=getRange(lastThresh,thresh);
-    	lastThresh=thresh;
-    	List<BidDetails> bids=sos.getBidsinRange(r);
-        Bid b=pickBestBid(bids,lastReceivedOffer);
-         if (b!=null){
-                myLastOffer = b;
-                action=new Offer(this.getPartyId(), myLastOffer);;
-                
-            }
-        else{
-        	System.out.println("b is null");
-        	myLastOffer=getMaxUtilityBid();
-        	action=new Offer(this.getPartyId(), myLastOffer);
+    	misc.Range r = getRange(lastThresh,thresh);
+    	lastThresh = thresh;
+    	List<BidDetails> bids = sos.getBidsinRange(r);
+        Bid b = pickBestBid(bids,lastReceivedOffer);
+        if (b != null){
+        	myLastOffer = b;
+        	action = new Offer(this.getPartyId(), myLastOffer);;    
+        }else{
+        	System.out.println("BOA: best bid is null");
+        	myLastOffer = getMaxUtilityBid();
+        	action = new Offer(this.getPartyId(), myLastOffer);
         }
-         if(getUtility(lastReceivedOffer)>getUtility(myLastOffer)){
-        	 System.out.println("good util!");         
-     		action =  new Accept(this.getPartyId(),lastReceivedOffer);}
+        if( getUtility(lastReceivedOffer) > getUtility(myLastOffer)){
+        	System.out.println("BOA: Good util!");         
+     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
+     	}
      	
         return action;
 			
@@ -127,7 +127,7 @@ rounds++;
     		try{
     			for(int i=0;i<bids.size();i++)
     		blist.add(bids.get(i).getBid());}
-    		catch(Exception e){System.out.println("in except pickbestbid");
+    		catch(Exception e){System.out.println("BOA: in except pickbestbid");
     		b=null;}
     		b=ms.pickBest(blist);
     	
@@ -140,6 +140,7 @@ rounds++;
     	double thresh = Pmin+(Pmax-Pmin)*(1-theta);
     	return thresh;
     }
+    
     private Bid getMaxUtilityBid() {
         try {
             return this.utilitySpace.getMaxUtilityBid();

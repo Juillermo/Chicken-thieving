@@ -1,4 +1,5 @@
 
+import java.util.Arrays;
 import java.util.List;
 
 import negotiator.AgentID;
@@ -15,17 +16,17 @@ public class ModelScore{
     double[][] score;
     TimeLineInfo timeline;
     AgentID agents[];
-    Bid onTable;
+    Bid bidOnTable;
     int numOms;
     NegotiationInfo ni;
     
-	public ModelScore(NegotiationInfo info,OpponentModel[] models){
+	public ModelScore(NegotiationInfo info, OpponentModel[] models){
 		
 	    timeline=info.getTimeline();
 		agents=new AgentID[2];
-		oms=models;
+		oms = models;
 		numOms=models.length;
-		onTable=null;
+		bidOnTable = null;
 		score=new double[numOms][2];
 		ni=info;
 	}
@@ -49,38 +50,38 @@ public class ModelScore{
 				
         if (act instanceof Offer) { 
             Offer offer = (Offer) act;
-            double time=timeline.getTime();
-            Bid b = offer.getBid();
-            scoreModels(b,onTable,id);
-            onTable=b;
+            double time = timeline.getTime();
+            Bid offeredBid = offer.getBid();
+            scoreModels(offeredBid, bidOnTable, id);
+            bidOnTable = offeredBid;
             for(int i=0;i<numOms;i++)
-            	oms[i].updateModel(b, time);
-            
-            
+            	oms[i].updateModel(offeredBid, time);
         }
-		
+        
+        System.out.println("BOA: Weights of model for 1st agent: "+ Arrays.toString(oms[0].getIssueWeights()) );
+        System.out.println("BOA: Weights of model for 2nd agent: "+ Arrays.toString(oms[1].getIssueWeights()) );
+	
 	}
 	
 	public int checkConsistency(int model, Bid oldBid, Bid newBid){
-		double oldUtil=oms[model].getBidEvaluation(oldBid);
-		double newUtil=oms[model].getBidEvaluation(newBid);
-		System.out.println("model "+model+" old "+oldUtil+" new "+newUtil);	  
+		double oldUtil = oms[model].getBidEvaluation(oldBid);
+		double newUtil = oms[model].getBidEvaluation(newBid);
+		System.out.println("BOA: Old utility: "+oldUtil+", New utility: "+newUtil);	  
 		return (oldUtil<=newUtil)?1:-1;		
 	}
 	
-	public void scoreModels(Bid b, Bid ot, int agentId){
-		if(ot!=null)
-		for(int i=0;i<numOms;i++)
-			{
-			int con=checkConsistency(i,ot,b);
-			System.out.println(con);
-			score[i][agentId]=score[i][agentId]+con;
-			System.out.println("model "+ i+" agent "+agentId+" score "+score[i][agentId]);
-			}
-		for(int mod=0;mod<2;mod++)
-		{for(int ag=0;ag<2;ag++)
-			System.out.print(score[mod][ag]+"  ");
-		System.out.println("");}
+	public void scoreModels(Bid offeredBid, Bid bidOnTable, int agentId){
+		if(bidOnTable != null)
+		for(int i=0; i<numOms; i++){
+			int consistency = checkConsistency(i, bidOnTable, offeredBid);
+			System.out.println("BOA: Model consistency: " + consistency);
+			score[i][agentId]=score[i][agentId]+consistency;
+			System.out.println("BOA: Model "+ i+" Agent "+agentId+", score: "+score[i][agentId]);
+		}
+		for(int mod=0; mod<2; mod++){
+			for(int ag=0; ag<2; ag++) System.out.print(score[mod][ag]+"  ");
+			System.out.println(" <- Model "+mod);
+		}
 	}
 	
 	public double getScore(int model, int agent){
@@ -90,19 +91,19 @@ public class ModelScore{
 	public OpponentModel getBestOm(AgentID a){
 		int agent=getAgentId(a);
 		double best= 0;
-		int bestid=-1;
-		OpponentModel bestOm=null;
+		int bestid = -1;
+		OpponentModel bestOm = null;
 		for (int i=0;i<numOms;i++)
 			{
 			//System.out.println("model "+i+" agent "+agent+" score "+score[i][agent]);
-			if(score[i][agent]>best)
+			if(score[i][agent] > best)
 			{
-				best=score[i][agent];
-				bestOm=oms[i];
+				best = score[i][agent];
+				bestOm = oms[i];
 				bestid=i;
 			}
 			}
-		System.out.println("Picking model "+bestid+" for agent "+agent);
+		System.out.println("BOA: Picking model "+bestid+" for agent "+agent);
 		return bestOm;
 	}
 	
