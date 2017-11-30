@@ -1,59 +1,48 @@
 
+import java.util.ArrayList;
 import java.util.List;
 
 import negotiator.AgentID;
 import negotiator.Bid;
+import negotiator.utility.AbstractUtilitySpace;
+import negotiator.bidding.BidDetails;
 import negotiator.actions.Action;
 import negotiator.parties.NegotiationInfo;
 import negotiator.actions.Offer;
 import negotiator.timeline.TimeLineInfo;
 import negotiator.boaframework.OpponentModel;
+import negotiator.BidIterator;
 
 public class ModelScore{
 
 	OpponentModel[] oms;
-    double[][] score;
+    Score[] score;
     TimeLineInfo timeline;
-    AgentID agents[];
-    Bid onTable;
-    int numOms;
+    AgentID agent;
     NegotiationInfo ni;
+    AbstractUtilitySpace u;
     
-	public ModelScore(NegotiationInfo info,OpponentModel[] models){
+    public ModelScore(NegotiationInfo info,OpponentModel[] models){
 		
 	    timeline=info.getTimeline();
-		agents=new AgentID[2];
 		oms=models;
-		numOms=models.length;
-		onTable=null;
-		score=new double[numOms][2];
+		score=new Score[models.length];
+		for(int i=0;i<models.length;i++)
+			score[i]=new Score();
 		ni=info;
+		u=ni.getUtilitySpace();
 	}
 	
+
 	
-	
-	public int getAgentId(AgentID agent){
-		int id=-1;
-		if(agents[0]==null)
-        	{agents[0]=agent;id=0;}
-        else if(agents[1]==null)
-        	{agents[1]=agent;id=1;}
-        else
-        	id=(agent.equals(agents[0]))? 0:1;
-              
-        return id;		
-	}
-	
-	public void updateModels(AgentID agent, Action act, TimeLineInfo timeline){
-		int id = getAgentId(agent);
+	public void updateModels(Action act, TimeLineInfo timeline, Bid onTable){
 				
         if (act instanceof Offer) { 
             Offer offer = (Offer) act;
             double time=timeline.getTime();
             Bid b = offer.getBid();
-            scoreModels(b,onTable,id);
-            onTable=b;
-            for(int i=0;i<numOms;i++)
+            scoreModels(b,onTable);
+            for(int i=0;i<oms.length;i++)
             	oms[i].updateModel(b, time);
             
             
@@ -61,75 +50,65 @@ public class ModelScore{
 		
 	}
 	
-	public int checkConsistency(int model, Bid oldBid, Bid newBid){
+	public boolean checkConsistency(int model, Bid oldBid, Bid newBid){
 		double oldUtil=oms[model].getBidEvaluation(oldBid);
 		double newUtil=oms[model].getBidEvaluation(newBid);
-		System.out.println("model "+model+" old "+oldUtil+" new "+newUtil);	  
-		return (oldUtil<=newUtil)?1:-1;		
+		
+		//System.out.println("model "+model+" old "+oldUtil+" new "+newUtil);	  
+		return (oldUtil<=newUtil)?true:false;		
 	}
 	
-	public void scoreModels(Bid b, Bid ot, int agentId){
+	public void scoreModels(Bid b, Bid ot){
 		if(ot!=null)
-		for(int i=0;i<numOms;i++)
+		for(int i=0;i<oms.length;i++)
 			{
-			int con=checkConsistency(i,ot,b);
-			System.out.println(con);
-			score[i][agentId]=score[i][agentId]+con;
-			System.out.println("model "+ i+" agent "+agentId+" score "+score[i][agentId]);
+			boolean con=checkConsistency(i,ot,b);
+			score[i].update(con);
 			}
-		for(int mod=0;mod<2;mod++)
-		{for(int ag=0;ag<2;ag++)
-			System.out.print(score[mod][ag]+"  ");
-		System.out.println("");}
+		else
+			System.out.println("ot is null!");
+		
 	}
 	
-	public double getScore(int model, int agent){
-		return score[model][agent];
+	public double getScore(int model){
+		return score[model].score();
 	}
 	
-	public OpponentModel getBestOm(AgentID a){
-		int agent=getAgentId(a);
+	public boolean getConfidence(int window, int overlook){
+		int model=getBestOmId();
+		return score[model].trackRec(window,overlook);
+	}
+	
+	public OpponentModel getBestOm(){
 		double best= 0;
-		int bestid=-1;
 		OpponentModel bestOm=null;
-		for (int i=0;i<numOms;i++)
+		for (int i=0;i<oms.length;i++)
 			{
-			//System.out.println("model "+i+" agent "+agent+" score "+score[i][agent]);
-			if(score[i][agent]>best)
+			System.out.print(" model "+i+" score "+score[i].score());
+			if(score[i].score()>best)
 			{
-				best=score[i][agent];
+				best=score[i].score();
 				bestOm=oms[i];
-				bestid=i;
 			}
 			}
-		System.out.println("Picking model "+bestid+" for agent "+agent);
 		return bestOm;
 	}
 	
-	public Bid pickBest(List<Bid> bids){
-		OpponentModel om0=getBestOm(agents[0]);
-		OpponentModel om1=getBestOm(agents[1]);
-		double maxNash=0;
-		double nash=0;
-		Bid b=null;
-		Bid bestBid=null;
-		double v0=1;
-		double v1=1;
-		double v2=1;
-		
-		for(int i=0;i<bids.size();i++){
-			b=bids.get(i);
-			if(om0!=null)
-			    v0=om0.getBidEvaluation(b);
-			if(om1!=null)
-				v1=om1.getBidEvaluation(b);
-			v2=ni.getUtilitySpace().getUtility(b);
-			nash=v0*v1*v2 ;
-			if(nash>maxNash){
-				maxNash=nash;
-				bestBid=b;
+	public int getBestOmId(){
+		double best= 0;
+		int bestid=-1;
+		for (int i=0;i<oms.length;i++)
+			{
+			if(score[i].score()>best)
+			{
+				best=score[i].score();
+				bestid=i;
 			}
-		}
-		return bestBid;
+			}
+		return bestid;
 	}
+	
+
+	
+	
 }
