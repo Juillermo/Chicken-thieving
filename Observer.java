@@ -51,6 +51,7 @@ public class Observer extends AbstractNegotiationParty {
    double phase2at;
    double phase3at;
    double phase4at;
+   double phase3Aat;
 	ModelDomain md;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
@@ -81,8 +82,10 @@ public class Observer extends AbstractNegotiationParty {
         phase3bids=null;
         md=new ModelDomain(info.getUtilitySpace());
         phase2at=0.5;
-        phase3at=0.95;
+        phase3Aat=0.95;
+        phase3at=0.9;
         phase4at=0.98;
+        
         
 	
 		
@@ -119,7 +122,7 @@ public class Observer extends AbstractNegotiationParty {
         }
        else if(ag==1 && act instanceof Accept){
     	   if(backup==null || (getUtility(backup)<getUtility(lastReceivedOffer)))
-    		   {backup=lastReceivedOffer;System.out.println("backup util is"+ getUtility(backup));}
+    		   {backup=lastReceivedOffer;System.out.println("backup util is"+ getUtility(backup));phase3at=phase3Aat;}
     	      		   
        }
         
@@ -140,7 +143,9 @@ rounds++;
     	Bid b=null;
     	if(rem<=2)
     		{System.out.println("last");
+    		if(backup==null)System.out.println("no backup");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
+    		return action;
     		}
     	else if(time>phase4at || rem<5 && backup!=null){
     		b= backup;
@@ -148,7 +153,6 @@ rounds++;
     	else if(time>phase3at && nashflag){
     		b=phase3bid(rem);
     		System.out.println("phase3");
-    		
     	}
     	
     	
@@ -157,7 +161,7 @@ rounds++;
 		if(!nashflag)
 			{sortNash();nashflag=true;}
 		b=phase2bid(time);
-                
+	         
     	}
     	
     	else{
