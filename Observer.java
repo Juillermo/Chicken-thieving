@@ -114,6 +114,7 @@ public class Observer extends AbstractNegotiationParty {
             Offer offer = (Offer) act;
             try {
 				ms[ag].updateModels( offer, timeline,lastReceivedOffer);
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -181,7 +182,12 @@ rounds++;
         
     	
          if(getUtility(myLastOffer)<=getUtility(lastReceivedOffer))
-        	 action=new Accept(this.getPartyId(), lastReceivedOffer);
+        	 {
+        	 if(backup!=null && getUtility(lastReceivedOffer)>getUtility(backup))
+        		 action=new Accept(this.getPartyId(), lastReceivedOffer);
+        	 else
+        		 action=new Offer(this.getPartyId(), backup);
+        	 }
            	
         		
         return action;
