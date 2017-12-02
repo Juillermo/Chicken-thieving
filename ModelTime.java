@@ -6,6 +6,7 @@ public class ModelTime {
     int store;
 	double[] TT;
 	double lasttime;
+	double maxtime;
 	
 	public ModelTime(){
 		counter = 0;
@@ -13,7 +14,7 @@ public class ModelTime {
 	    store = 5;
 		TT = new double[store];
 		lasttime = 0.0;
-		
+	    maxtime = 0.0;
 	}
 	public void model(double time){
 		
@@ -21,21 +22,22 @@ public class ModelTime {
 		int rm = counter%store;
 		counter++;
 		TT[rm] = time-lasttime;
-		for(int i=0; i<store; i++)
+		maxtime = 0;
+	
+		for(int i=0; i<store; i++){
 			sum += TT[i];
-		avgtime = (counter<store) ? sum/counter : sum/store;
+			if(TT[i]>maxtime)
+				maxtime=TT[i];
+		}
+		avgtime = (counter<store)?sum/counter:sum/store;
 		lasttime = time;
-		
 	}
 	
 	public int getRemRounds(double time){
-		
-		double avgRoundTime = avgtime;
-		int remRounds = (int)Math.floor((1-time)/avgRoundTime);
-		System.out.println("\nBOA: Rounds remaining: "+ remRounds);
-		
-		 return remRounds;
-	 }
+		int remRounds = (int)Math.floor((1-time)/maxtime);
+		//System.out.println("\nBOA: Rounds remaining: "+ remRounds);
+		return remRounds;
+	}
 	
 
 }

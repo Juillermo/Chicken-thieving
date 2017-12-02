@@ -9,7 +9,6 @@ import negotiator.Bid;
 import negotiator.BidIterator;
 import negotiator.actions.Action;
 import negotiator.actions.Offer;
-import agents.anac.y2015.Atlas3.Atlas3;
 import negotiator.parties.AbstractNegotiationParty;
 import negotiator.parties.NegotiationInfo;
 import negotiator.boaframework.NegotiationSession;
@@ -22,12 +21,12 @@ import negotiator.actions.Accept;
 import negotiator.boaframework.SortedOutcomeSpace;
 
 
-public class NNash extends AbstractNegotiationParty {
+public class SimpleBackup extends AbstractNegotiationParty {
 	
 	private
 
 	
-    final String description = "NNash Agent";
+    final String description = "Backup Agent";
     Bid lastReceivedOffer; // offer on the table
     Bid myLastOffer;
     ModelTime t;
@@ -59,30 +58,16 @@ public class NNash extends AbstractNegotiationParty {
 	public void init(NegotiationInfo info) {
 		super.init(info);
 		
-		omr=new OMrepo(info);
-		models = new OpponentModel[2][numModels];
-		models[0]=omr.getModels();
-		models[1]=omr.getModels();
-		ms=new ModelScore[2];
-		ms[0]=new ModelScore(info,models[0]);
-		ms[1]=new ModelScore(info,models[1]);
 		MINIMUM_BID_UTILITY = utilitySpace.getReservationValueUndiscounted();
 		t=new ModelTime();
         sos=new SortedOutcomeSpace(info.getUtilitySpace());
         lastThresh=1.0;
-        lastNashThresh=1.0;
         rounds=0;
         backup=null;
         agents=new AgentID[2];
         agents[0]=null;
         agents[1]=null;
-        nashbids=null;
-        phase3count=0;
-        phase3bids=null;
-        md=new ModelDomain(info.getUtilitySpace());
-        phase2at=0.5;
-        phase3at=0.6;
-        
+              
 	
 		
 	}
@@ -108,9 +93,13 @@ public class NNash extends AbstractNegotiationParty {
         int ag = getAgentId(sender);
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
-            ms[ag].updateModels( offer, timeline,lastReceivedOffer);
             lastReceivedOffer = offer.getBid();
         }
+       else if(ag==1 && act instanceof Accept){
+    	   if(backup==null || (getUtility(backup)<getUtility(lastReceivedOffer)))
+    		   {backup=lastReceivedOffer;System.out.println("backup util is"+ getUtility(backup));}
+    	      		   
+       }
         
     };
 	
@@ -127,34 +116,22 @@ rounds++;
     	int rem=t.getRemRounds(time);
     	double thresh;
     	Bid b=null;
-    	if(time>0.95)
-    		System.out.println("rem rounds "+rem);
     	if(rem<=2)
     		{System.out.println("last");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
     		}
-    	else if(time>phase3at && nashflag){
-    		b=phase3bid(rem);
-    		System.out.println("phase3");
-    		
+    	
+    	else if(time>0.95 || rem<5 && backup!=null){
+    		b= backup;
     	}
     	
-    	
-    	else if(time>phase2at && ms[0].confident(100,5) && ms[1].confident(100,5))
-		{
-		if(!nashflag)
-			{sortNash();nashflag=true;}
-		b=phase2bid(time);
-                
-    	}
-    	
-    	else{
+    	else {
     		    b=phase1bid(time);
                 
             }
     	if (b!=null){
             myLastOffer = b;
-            action=new Offer(this.getPartyId(), myLastOffer);;
+            action=new Offer(this.getPartyId(), myLastOffer);
             
         }
     else{
@@ -173,44 +150,15 @@ rounds++;
 	}
 
   
-   public Bid phase3bid(int rem){
-	   if(phase3count==0 ){
-		  int i=0;
-		  phase3bids=new ArrayList<NashBidDetails>();
-		  
-		  while(i<rem){
-			  if(i<(md.getSize()/4))
-				  phase3bids.add(nashbids.get(i));
-			  else
-				  phase3bids.add(nashbids.get(i%4));
-			  i++;
-		  }
-		  Collections.sort(phase3bids,NashBidDetails.utComparator);
-	   }
-	  
-	   phase3count++;
-	   return phase3bids.get(phase3count).getBid();
-   }
-   
-   public Bid phase2bid(double time){
-	   double thresh=getNashThresh(time,0.2,1,0);
-    	misc.Range r=getRange(lastNashThresh,thresh);
-    	lastNashThresh=thresh;
-   	   List<BidDetails> bids=sos.getBidsinRange(r);
-       Bid b=pickBest(bids);
-       return b;
-       
-        
-   }
-   
    public Bid phase1bid(double time){
-    double thresh=getThresh(time,0.2,1,0);
+
+    double thresh=getThresh(time,0.1,1,0.7);
 	
 	
 	misc.Range r=getRange(lastThresh,thresh);
 	lastThresh=thresh;
 	List<BidDetails> bids=sos.getBidsinRange(r);
-   Bid b=pickBest(bids);
+   Bid b=bids.get(0).getBid();
    return b;
    }
    
@@ -220,17 +168,7 @@ rounds++;
     	return thresh;
     }
     
-    public double getNashThresh(double time, double e,double Pmax, double Pmin){
-    	double theta= Math.pow(time,(1.0/e));
-    	double thresh = Pmin+(Pmax-Pmin)*(1-theta);		
-    	double ut=getUtility(getNashBids(1).get(0).getBid());
-    	System.out.println("utility at nash is "+ut);
-		Pmin=ut-0.05;
-		thresh = Pmin+(Pmax-Pmin)*(1-theta);
-		
-    	return thresh;
-    }
-    
+   
     private Bid getMaxUtilityBid() {
         try {
             return this.utilitySpace.getMaxUtilityBid();
@@ -249,58 +187,6 @@ rounds++;
     		
     	}
     
-	public Bid pickBest(List<BidDetails> bd){
-		Bid b=null;
-		double nash=0;
-		double maxNash=0;
-		Bid bestBid=null;
-		for(int i=0;i<bd.size();i++){
-			b=bd.get(i).getBid();
-			nash=nashProduct(b);
-			if(nash>=maxNash){
-				maxNash=nash;
-				bestBid=b;
-			}
-		}
-		if(bestBid==null)bestBid=bd.get(0).getBid();
-		return bestBid;
-	}
-	
-	public double nashProduct(Bid bid){
-		OpponentModel om0=ms[0].getBestOm();
-		OpponentModel om1=ms[1].getBestOm();
-		double v1=0;
-        double v2=0;
-        double v3=0;
-        v1=getUtility(bid);
-        if(om0!=null)
-		    v2=om0.getBidEvaluation(bid);
-		if(om1!=null)
-			v3=om1.getBidEvaluation(bid);
-	    double nash=v1*v2*v3;
-	    return nash;	
-	}
-	
-
-	public void sortNash(){
-		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
-		nashbids=new ArrayList<NashBidDetails>();
-		Bid bid;
-		NashBidDetails nbid;
-		while (bidIterator.hasNext()) {
-		   bid = bidIterator.next();
-		   nbid=new NashBidDetails(bid,getUtility(bid),nashProduct(bid));
-		   nashbids.add(nbid);
-		   }
-		Collections.sort(nashbids,Collections.reverseOrder(NashBidDetails.nashComparator));
-		
-	}
-	
-	public List<NashBidDetails> getNashBids(int n){
-		List<NashBidDetails> nashList = new ArrayList<>(nashbids.subList(0,n));
-		return nashList;
-		
-	}
 
     }
  

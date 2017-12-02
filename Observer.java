@@ -9,7 +9,6 @@ import negotiator.Bid;
 import negotiator.BidIterator;
 import negotiator.actions.Action;
 import negotiator.actions.Offer;
-import agents.anac.y2015.Atlas3.Atlas3;
 import negotiator.parties.AbstractNegotiationParty;
 import negotiator.parties.NegotiationInfo;
 import negotiator.boaframework.NegotiationSession;
@@ -22,12 +21,12 @@ import negotiator.actions.Accept;
 import negotiator.boaframework.SortedOutcomeSpace;
 
 
-public class NNash extends AbstractNegotiationParty {
+public class Observer extends AbstractNegotiationParty {
 	
 	private
 
 	
-    final String description = "NNash Agent";
+    final String description = "Observer Agent";
     Bid lastReceivedOffer; // offer on the table
     Bid myLastOffer;
     ModelTime t;
@@ -51,6 +50,8 @@ public class NNash extends AbstractNegotiationParty {
 	List<NashBidDetails> nashbids;
    double phase2at;
    double phase3at;
+   double phase4at;
+   double phase3Aat;
 	ModelDomain md;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
@@ -81,7 +82,10 @@ public class NNash extends AbstractNegotiationParty {
         phase3bids=null;
         md=new ModelDomain(info.getUtilitySpace());
         phase2at=0.5;
-        phase3at=0.6;
+        phase3Aat=0.95;
+        phase3at=0.9;
+        phase4at=0.98;
+        
         
 	
 		
@@ -108,9 +112,20 @@ public class NNash extends AbstractNegotiationParty {
         int ag = getAgentId(sender);
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
-            ms[ag].updateModels( offer, timeline,lastReceivedOffer);
+            try {
+				ms[ag].updateModels( offer, timeline,lastReceivedOffer);
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             lastReceivedOffer = offer.getBid();
         }
+       else if(ag==1 && act instanceof Accept){
+    	   if(backup==null || (getUtility(backup)<getUtility(lastReceivedOffer)))
+    		   {backup=lastReceivedOffer;System.out.println("backup util is"+ getUtility(backup));phase3at=phase3Aat;}
+    	      		   
+       }
         
     };
 	
@@ -127,16 +142,18 @@ rounds++;
     	int rem=t.getRemRounds(time);
     	double thresh;
     	Bid b=null;
-    	if(time>0.95)
-    		System.out.println("rem rounds "+rem);
     	if(rem<=2)
     		{System.out.println("last");
+    		if(backup==null)System.out.println("no backup");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
+    		return action;
     		}
+    	else if(time>phase4at || rem<5 && backup!=null){
+    		b= backup;
+    	}
     	else if(time>phase3at && nashflag){
     		b=phase3bid(rem);
     		System.out.println("phase3");
-    		
     	}
     	
     	
@@ -145,7 +162,7 @@ rounds++;
 		if(!nashflag)
 			{sortNash();nashflag=true;}
 		b=phase2bid(time);
-                
+	         
     	}
     	
     	else{
@@ -165,7 +182,13 @@ rounds++;
         
     	
          if(getUtility(myLastOffer)<=getUtility(lastReceivedOffer))
-        	 action=new Accept(this.getPartyId(), lastReceivedOffer);
+        	 {
+        	 if(backup!=null && getUtility(lastReceivedOffer)<=getUtility(backup))
+        		 action=new Offer(this.getPartyId(), backup);
+        	 else
+        		 
+        		 action=new Accept(this.getPartyId(), lastReceivedOffer);
+        	 }
            	
         		
         return action;
@@ -179,17 +202,18 @@ rounds++;
 		  phase3bids=new ArrayList<NashBidDetails>();
 		  
 		  while(i<rem){
-			  if(i<(md.getSize()/4))
+			  if(i<(Math.ceil(md.getSize()/8)))
 				  phase3bids.add(nashbids.get(i));
 			  else
-				  phase3bids.add(nashbids.get(i%4));
+				  phase3bids.add(nashbids.get(i%(int)(Math.ceil(md.getSize()/8))));
 			  i++;
 		  }
-		  Collections.sort(phase3bids,NashBidDetails.utComparator);
 	   }
 	  
 	   phase3count++;
-	   return phase3bids.get(phase3count).getBid();
+	   if(phase3count>phase3bids.size())
+		   phase3count=1;
+	   return phase3bids.get(phase3count-1).getBid();
    }
    
    public Bid phase2bid(double time){
@@ -204,7 +228,7 @@ rounds++;
    }
    
    public Bid phase1bid(double time){
-    double thresh=getThresh(time,0.2,1,0);
+    double thresh=getThresh(time,0.2,1,0.8);
 	
 	
 	misc.Range r=getRange(lastThresh,thresh);
@@ -292,7 +316,7 @@ rounds++;
 		   nbid=new NashBidDetails(bid,getUtility(bid),nashProduct(bid));
 		   nashbids.add(nbid);
 		   }
-		Collections.sort(nashbids,Collections.reverseOrder(NashBidDetails.nashComparator));
+		Collections.sort(nashbids,Collections.reverseOrder(NashBidDetails.weightedComparator));
 		
 	}
 	

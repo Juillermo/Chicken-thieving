@@ -6,6 +6,8 @@ import java.util.List;
 
 import negotiator.AgentID;
 import negotiator.Bid;
+import negotiator.utility.AbstractUtilitySpace;
+import negotiator.utility.AdditiveUtilitySpace;
 import negotiator.bidding.BidDetails;
 import negotiator.actions.Action;
 import negotiator.parties.NegotiationInfo;
@@ -39,7 +41,6 @@ public class ModelScore{
 
 	
 	public void updateModels(Action act, TimeLineInfo timeline, Bid onTable) throws Exception{
-				
         if (act instanceof Offer) { 
             Offer offer = (Offer) act;
             double time = timeline.getTime();
@@ -98,8 +99,10 @@ public class ModelScore{
 		return score[model].score();
 	}
 	
-	public boolean getConfidence(int window, int overlook){
+	public boolean confident(int window, int overlook){
 		int model=getBestOmId();
+		if(model==-1)
+			return false;
 		return score[model].trackRec(window,overlook);
 	}
 	
