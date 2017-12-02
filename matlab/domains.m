@@ -153,7 +153,7 @@ profile_name = 'SmartEnergyGrid_util';
 profile_nums = [1 2 3];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
-%% Smartgrid of Cadeceus (bid space: 80)
+%% Smartgrid of Caduceus (bid space: 80)
 
 profiles_dir = 'etc/templates/ANAC2016/Caduceus';
 profile_name = 'Smart_Grid_util';

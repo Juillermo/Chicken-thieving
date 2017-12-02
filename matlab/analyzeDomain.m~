@@ -1,4 +1,4 @@
-function [umax, umin, bid_space, hyper_utilities, nash, eval_names] = analyzeDomain(domain_dir, domain_file, domain_nums)
+function [umax, umin, bid_space, hyper_utilities, eval_names] = analyzeDomain(domain_dir, domain_file, domain_nums)
 % Inputs
 % domain_dir: directory of the profiles files
 % domain_file: name of the xml files (without number or .xml)
@@ -61,6 +61,7 @@ hyper_utilities = hypercubes{1};
 for j=2:n_issues
     hyper_utilities = hyper_utilities + hypercubes{j};
 end
+hyper_utilities= [hyper_utilities; 
 utilities = reshape(hyper_utilities, 3, bid_space);
 
 % Nash product
@@ -70,8 +71,6 @@ utilities = [utilities; utilities(1,:) .* utilities(2,:) .* utilities(3,:)];
 [vmax, imax] = max(utilities, [], 2);
 umax = utilities(:, imax);
 umax = [umax; norm(umax(1:3,1)-umax(1:3,4)), norm(umax(1:3,2)-umax(1:3,4)), norm(umax(1:3,3)-umax(1:3,4)), 0];
-
-nash = umax(1:3,4);
 
 % Point of symmetric agreement
 vmin = min(utilities);

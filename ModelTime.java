@@ -8,23 +8,23 @@ public class ModelTime {
 	double lasttime;
 	
 	public ModelTime(){
-		counter=0;
-	    avgtime=0.0;
-	    store=5;
-		TT=new double[store];
-		lasttime=0.0;
+		counter = 0;
+	    avgtime = 0.0;
+	    store = 5;
+		TT = new double[store];
+		lasttime = 0.0;
 		
 	}
 	public void model(double time){
 		
-		double sum=0;
+		double sum = 0;
 		int rm = counter%store;
 		counter++;
-		TT[rm]=time-lasttime;
-		for(int i=0;i<store;i++)
-			{sum=sum+TT[i];}
-		avgtime=(counter<store)?sum/counter:sum/store;
-		lasttime=time;
+		TT[rm] = time-lasttime;
+		for(int i=0; i<store; i++)
+			sum += TT[i];
+		avgtime = (counter<store) ? sum/counter : sum/store;
+		lasttime = time;
 		
 	}
 	

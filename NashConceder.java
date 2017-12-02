@@ -2,7 +2,6 @@
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import negotiator.AgentID;
 import negotiator.Bid;
@@ -22,15 +21,15 @@ import negotiator.actions.Accept;
 import negotiator.boaframework.SortedOutcomeSpace;
 
 
-public class BoaAgent extends AbstractNegotiationParty {
+public class NashConceder extends AbstractNegotiationParty {
 	
 	private
 
 	
-    final String description = "OMScore Agent";
+    final String description = "NashConceder Agent";
     Bid lastReceivedOffer; // offer on the table
     Bid myLastOffer;
-    ModelTime timeModel;
+    ModelTime t;
     SortedOutcomeSpace sos;
     double lastThresh;
     int rounds;
@@ -43,9 +42,8 @@ public class BoaAgent extends AbstractNegotiationParty {
     OMrepo omr;
     Bid backup;
     boolean nashflag;
-    double pmin = 0;
-    int numModels = 2;
-    
+    double pmin=0;
+   int numModels=2;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
 	 */
@@ -55,14 +53,14 @@ public class BoaAgent extends AbstractNegotiationParty {
 		
 		omr=new OMrepo(info);
 		models = new OpponentModel[2][numModels];
-		models[0] = omr.getModels();
-		models[1] = omr.getModels();
-		ms = new ModelScore[2];
-		ms[0] = new ModelScore(info, models[0]);
-		ms[1] = new ModelScore(info, models[1]);
+		models[0]=omr.getModels();
+		models[1]=omr.getModels();
+		ms=new ModelScore[2];
+		ms[0]=new ModelScore(info,models[0]);
+		ms[1]=new ModelScore(info,models[1]);
 		MINIMUM_BID_UTILITY = utilitySpace.getReservationValueUndiscounted();
-		timeModel = new ModelTime();
-        sos = new SortedOutcomeSpace(info.getUtilitySpace());
+		t=new ModelTime();
+        sos=new SortedOutcomeSpace(info.getUtilitySpace());
         lastThresh=1.0;
         rounds=0;
         backup=null;
@@ -94,16 +92,10 @@ public class BoaAgent extends AbstractNegotiationParty {
         int ag = getAgentId(sender);
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
-            try {
-				ms[ag].updateModels( offer, timeline,lastReceivedOffer);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            
-            
+            ms[ag].updateModels( offer, timeline,lastReceivedOffer);
             lastReceivedOffer = offer.getBid();
         }
+        
     };
 	
 
@@ -111,15 +103,14 @@ public class BoaAgent extends AbstractNegotiationParty {
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> classes) {
 		
-		rounds++;
+rounds++;
     	
     	double time = getTimeLine().getTime();
-    	System.out.println("BOA: Time "+time);
-    	timeModel.model(time);
+    	t.model(time);
     	Action action=null;
-    	int rem=timeModel.getRemRounds(time);
+    	int rem=t.getRemRounds(time);
     	if(rem<=2)
-    		{System.out.println("BOA: Last round!!");
+    		{System.out.println("last");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
     		}
         double thresh=getThresh(time,0.2,1,0);
@@ -135,20 +126,33 @@ public class BoaAgent extends AbstractNegotiationParty {
                 
             }
         else{
-        	System.out.println("BOA: best bid is null");
+        	System.out.println("b is null");
         	myLastOffer=getMaxUtilityBid();
         	action=new Offer(this.getPartyId(), myLastOffer);
         }
          if(getUtility(myLastOffer)<=getUtility(lastReceivedOffer))
         	 action=new Accept(this.getPartyId(), lastReceivedOffer);
            	
+        		
         return action;
 			
 	}
 
+  
+   
+
+
     public double getThresh(double time, double e,double Pmax, double Pmin){
     	double theta= Math.pow(time,(1.0/e));
     	double thresh = Pmin+(Pmax-Pmin)*(1-theta);
+    	if(ms[0].confident(100,5) && ms[1].confident(100,5) && time>0.5 && !nashflag)
+    		{
+    		nashflag=true;
+    		double ut=utilityAtNash();
+    		Pmin=ut-0.05;
+    		thresh = Pmin+(Pmax-Pmin)*(1-theta);
+    		}
+    		
     	return thresh;
     }
     
@@ -172,35 +176,50 @@ public class BoaAgent extends AbstractNegotiationParty {
     
 	public Bid pickBest(List<BidDetails> bd){
 		Bid b=null;
-		List<Bid> bids=new ArrayList<Bid>();
-		for(int i=0;i<bd.size();i++)
-		bids.add(bd.get(i).getBid());
-		System.out.print("Agent 0: ");
-		OpponentModel om0=ms[0].getBestOm();
-		System.out.print("\nAgent 1: ");
-		OpponentModel om1=ms[1].getBestOm();
-		System.out.println("\n!!!!!!!!!");
-		double maxNash=0;
 		double nash=0;
+		double maxNash=0;
 		Bid bestBid=null;
-		double v0=1;
-		double v1=1;
-		double v2=1;
-		
-		for(int i=0;i<bids.size();i++){
-			b=bids.get(i);
-			if(om0!=null)
-			    v0=om0.getBidEvaluation(b);
-			if(om1!=null)
-				v1=om1.getBidEvaluation(b);
-			v2=getUtility(b);
-			nash=v0*v1*v2 ;
+		for(int i=0;i<bd.size();i++){
+			b=bd.get(i).getBid();
+			nash=nashProduct(b);
 			if(nash>=maxNash){
 				maxNash=nash;
 				bestBid=b;
 			}
 		}
+		if(bestBid==null)bestBid=bd.get(0).getBid();
 		return bestBid;
+	}
+	public double nashProduct(Bid bid){
+		OpponentModel om0=ms[0].getBestOm();
+		OpponentModel om1=ms[1].getBestOm();
+		double v1=0;
+        double v2=0;
+        double v3=0;
+        v1=getUtility(bid);
+        if(om0!=null)
+		    v2=om0.getBidEvaluation(bid);
+		if(om1!=null)
+			v3=om1.getBidEvaluation(bid);
+	    double nash=v1*v2*v3;
+	    return nash;	
+	}
+	
+
+	public double utilityAtNash(){
+		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
+		Bid bid=null;
+        double nash=0;
+        double maxNash=0;
+        Bid b=null;
+		while (bidIterator.hasNext()) {
+		   bid = bidIterator.next();
+		   nash=nashProduct(bid);
+		   maxNash=(nash>maxNash)?nash:maxNash;
+		   b=(nash>maxNash)?bid:b;
+		}
+		System.out.println("Nash at "+bid.toString());
+		return getUtility(bid);
 	}
 
     }

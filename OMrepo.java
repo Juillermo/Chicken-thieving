@@ -11,6 +11,12 @@ import negotiator.boaframework.SessionData;
 
 import negotiator.boaframework.opponentmodel.CUHKFrequencyModelV2;
 import negotiator.boaframework.opponentmodel.TheFawkes_OM;
+import negotiator.boaframework.opponentmodel.DefaultModel;
+import negotiator.boaframework.opponentmodel.UniformModel;
+import negotiator.boaframework.opponentmodel.BayesianModel;
+import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
+import negotiator.boaframework.opponentmodel.PerfectModel;
+import negotiator.boaframework.opponentmodel.OppositeModel;
 
 public class OMrepo{
 	OpponentModel[] models;
@@ -21,18 +27,35 @@ public class OMrepo{
 	
 	public OMrepo(NegotiationInfo info){
 		
-		ns=new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
-		s=new SessionData();
+		ns = new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
+		s = new SessionData();
 	  
-		models=new OpponentModel[2];
+		models = new OpponentModel[7];
 		Map<String, Double> p= new HashMap<String,Double>();
-		String arg = "l";
-		Double val = new Double(0.2);
-		p.put(arg, val);
-		models[0]=new CUHKFrequencyModelV2();
-		models[0].init(ns,p);
-		models[1]=new TheFawkes_OM();
-		models[1].init(ns,p);
+		
+		//models[0] = new UniformModel();
+		models[0] = new PerfectModel();
+		models[0].init(ns, null);
+		
+		models[1] = new UniformModel();
+		models[1].init(ns, null);
+		
+		models[2] = new CUHKFrequencyModelV2();
+		models[2].init(ns, null);
+		
+		models[3] = new TheFawkes_OM();
+		models[3].init(ns, null);
+		
+		models[4] = new BayesianModel();
+		p.put("m", 0.0);
+		models[4].init(ns, p);
+		
+		models[5] = new OppositeModel();
+		models[5].init(ns, null);
+		
+		models[6] = new HardHeadedFrequencyModel();
+		p.put("l", 0.2);
+		models[6].init(ns,p);
 	}
 	
 	public OpponentModel[] getModels(){
