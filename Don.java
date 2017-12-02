@@ -53,6 +53,7 @@ public class Don extends AbstractNegotiationParty {
    double phase4at;
    double phase3Aat;
 	ModelDomain md;
+	Bid onTable;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
 	 */
@@ -92,7 +93,7 @@ public class Don extends AbstractNegotiationParty {
         phase3Aat=0.95;
         phase3at=0.9;
         phase4at=0.98;
-        
+        onTable=null;
         
 	
 		
@@ -120,13 +121,14 @@ public class Don extends AbstractNegotiationParty {
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
             try {
-            	ms[ag].updateModels( offer, timeline,lastReceivedOffer);
+            	ms[ag].updateModels( offer, timeline,onTable);
 				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             lastReceivedOffer = offer.getBid();
+            onTable=lastReceivedOffer;
         }
        else if(ag==1 && act instanceof Accept){
     	   if(backup==null || (getUtility(backup)<getUtility(lastReceivedOffer)))
@@ -197,7 +199,8 @@ rounds++;
         		 action=new Accept(this.getPartyId(), lastReceivedOffer);
         	 }
            	
-        		
+        if(action instanceof Offer)
+        	onTable=((Offer)action).getBid();
         return action;
 			
 	}
