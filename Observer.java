@@ -183,10 +183,11 @@ rounds++;
     	
          if(getUtility(myLastOffer)<=getUtility(lastReceivedOffer))
         	 {
-        	 if(backup!=null && getUtility(lastReceivedOffer)>getUtility(backup))
-        		 action=new Accept(this.getPartyId(), lastReceivedOffer);
-        	 else
+        	 if(backup!=null && getUtility(lastReceivedOffer)<=getUtility(backup))
         		 action=new Offer(this.getPartyId(), backup);
+        	 else
+        		 
+        		 action=new Accept(this.getPartyId(), lastReceivedOffer);
         	 }
            	
         		
