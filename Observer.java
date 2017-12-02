@@ -44,14 +44,14 @@ public class Observer extends AbstractNegotiationParty {
     Bid backup;
     boolean nashflag;
     double pmin=0;
-   int numModels=2;
-   int phase3count;
-   List<NashBidDetails> phase3bids;
+    int numModels=2;
+    int phase3count;
+    List<NashBidDetails> phase3bids;
 	List<NashBidDetails> nashbids;
-   double phase2at;
-   double phase3at;
-   double phase4at;
-   double phase3Aat;
+	double phase2at;
+	double phase3at;
+	double phase4at;
+	double phase3Aat;
 	ModelDomain md;
 	/**
 	 * init is called when a nxt session starts with the same opponent.

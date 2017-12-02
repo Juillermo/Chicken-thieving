@@ -44,7 +44,7 @@ public class BoaAgent extends AbstractNegotiationParty {
     Bid backup;
     boolean nashflag;
     double pmin = 0;
-    int numModels = 2;
+    int numModels = 6;
     
 	/**
 	 * init is called when a nxt session starts with the same opponent.
@@ -53,7 +53,7 @@ public class BoaAgent extends AbstractNegotiationParty {
 	public void init(NegotiationInfo info) {
 		super.init(info);
 		
-		omr=new OMrepo(info);
+		omr = new OMrepo(info);
 		models = new OpponentModel[2][numModels];
 		models[0] = omr.getModels();
 		models[1] = omr.getModels();
@@ -95,7 +95,7 @@ public class BoaAgent extends AbstractNegotiationParty {
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
             try {
-				ms[ag].updateModels( offer, timeline,lastReceivedOffer);
+				ms[ag].updateModels( offer, timeline, lastReceivedOffer);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
