@@ -49,6 +49,9 @@ public class Don extends AbstractNegotiationParty {
 	double phase3Aat;
 	ModelDomain modelDomain;
 	Bid onTable;
+	int afterUs;
+	boolean chooseActionFlag;
+	boolean setOrderFlag;
 
 	/**
 	 * init is called when a nxt session starts with the same opponent.
@@ -96,6 +99,9 @@ public class Don extends AbstractNegotiationParty {
 		phase3at = 0.9;
 		phase4at = 0.98;
 		onTable = null;
+		chooseActionFlag = false;
+		afterUs = -1;
+		setOrderFlag = false;
 	}
 
 	@Override
@@ -121,6 +127,10 @@ public class Don extends AbstractNegotiationParty {
 	public void receiveMessage(AgentID sender, Action act) {
 		super.receiveMessage(sender, act);
 		int ag = getAgentId(sender);
+		if (chooseActionFlag && !setOrderFlag) {
+			setOrderFlag = true;
+			afterUs = ag;
+		}
 		if (act instanceof Offer) { // sender is making an offer
 			Offer offer = (Offer) act;
 			try {
@@ -130,23 +140,24 @@ public class Don extends AbstractNegotiationParty {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
 			lastReceivedOffer = offer.getBid();
 			onTable = lastReceivedOffer;
 
-		} else if (ag == 1 && act instanceof Accept) {
-
-			if (backup == null || (getUtility(backup) < getUtility(lastReceivedOffer))) {
-				backup = lastReceivedOffer;
-				System.out.println("backup util is" + getUtility(backup));
+		} else if (setOrderFlag && ag != afterUs && act instanceof Accept) {
+			if (backup == null || (getUtility(backup) < getUtility(onTable))) {
+				backup = onTable;
+				System.out.println("backup util is" + getUtility(backup) + "at round " + rounds);
 				phase3at = phase3Aat;
 			}
+
 		}
 
 	};
 
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> classes) {
-
+		chooseActionFlag = true;
 		rounds++;
 
 		double time = getTimeLine().getTime();
@@ -155,18 +166,19 @@ public class Don extends AbstractNegotiationParty {
 		int rem = t.getRemRounds(time);
 		double thresh;
 		Bid b = null;
-
+		System.out.println("Don: Remaining rounds: " + rem);
 		if (rem <= 1 && time > phase3at) {
 			System.out.println("Don: Last round!? Time: " + time + ", max time per round: " + t.maxtime);
 			action = new Accept(this.getPartyId(), lastReceivedOffer);
 			return action;
 
 		} else if ((time > phase4at || rem < 5) && backup != null) {
+			System.out.println("Don: Offering backup");
 			b = backup;
 
 		} else if (time > phase3at && nashflag) {
 			b = phase3bid(rem);
-			System.out.println("phase3");
+			System.out.println("Don: Entering phase 3");
 
 		} else if (time > phase2at && ms[0].confident(100, 5) && ms[1].confident(100, 5)) {
 			if (!nashflag) {
@@ -181,9 +193,9 @@ public class Don extends AbstractNegotiationParty {
 		if (b != null) {
 			myLastOffer = b;
 			action = new Offer(this.getPartyId(), myLastOffer);
-			;
+
 		} else {
-			System.out.println("b is null");
+			System.out.println("Don: b is null");
 			myLastOffer = getMaxUtilityBid();
 			action = new Offer(this.getPartyId(), myLastOffer);
 		}
@@ -205,9 +217,11 @@ public class Don extends AbstractNegotiationParty {
 	@Override
 	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(Bid acceptedBid) {
 		Bid nashBid = getNashBids(1).get(0).getBid();
+		
 		System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
 		ms[0].printState(nashBid);
 		ms[1].printState(nashBid);
+		
 		return null;
 	}
 
@@ -224,10 +238,10 @@ public class Don extends AbstractNegotiationParty {
 				i++;
 			}
 		}
-
 		phase3count++;
 		if (phase3count > phase3bids.size())
 			phase3count = 1;
+		
 		return phase3bids.get(phase3count - 1).getBid();
 	}
 
@@ -238,7 +252,6 @@ public class Don extends AbstractNegotiationParty {
 		List<BidDetails> bids = sos.getBidsinRange(r);
 		Bid b = pickBest(bids);
 		return b;
-
 	}
 
 	public Bid phase1bid(double time) {
@@ -261,7 +274,7 @@ public class Don extends AbstractNegotiationParty {
 		double thresh = Pmin + (Pmax - Pmin) * (1 - theta);
 		double ut = getUtility(getNashBids(1).get(0).getBid());
 
-		System.out.println("Don: utility at nash is " + ut);
+		System.out.println("Don: Utility at nash is " + ut);
 		Pmin = ut - 0.05;
 		thresh = Pmin + (Pmax - Pmin) * (1 - theta);
 
