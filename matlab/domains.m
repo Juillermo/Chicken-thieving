@@ -10,7 +10,7 @@ profiles_dir = 'etc/templates/ANAC2015/group7-movie';
 profile_name = 'movie-profile';
 n_profiles = 9;
 
-profile_nums = [1 2 3];
+profile_nums = [2 3 4];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
 allCombinations(n_profiles, [genius_dir profiles_dir], profile_name)

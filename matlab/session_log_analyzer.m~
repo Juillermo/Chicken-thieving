@@ -8,7 +8,7 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'log'];
-log_name = 'Log-Session_20171201-010833';
+log_name = 'Log-Session_20171203-184052';
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
@@ -42,9 +42,12 @@ diff_times = times - [0; times(1:end-1)];
 agent_times_agg = {times(1:3:end,:), times(2:3:end,:), times(3:3:end,:)};
 agent_dtimes = {diff_times(1:3:end,:), diff_times(2:3:end,:), diff_times(3:3:end,:)};
 
-figure(1), clf,
+%c_min = -6; c_max = -3;
+%edges = 10.^(c_min:0.1:c_max); 
+figure(2), clf,
+%histogram(agent_dtimes_agg, edges), set(gca,'YScale','log'), grid on,m
 for i= 1:3
-    subplot(2,3,i),   histogram(agent_dtimes{i}, 20), set(gca,'YScale','log'),
+    subplot(2,3,i),   histogram(agent_dtimes{i}, 10), set(gca,'YScale','log'),
     xlabel('Time per round'), title( agent_names{i} )
     subplot(2,3,i+3), semilogy(agent_times_agg{i}, agent_dtimes{i})
     xlabel('Negotiation time'), ylabel('Time per round'),
@@ -52,8 +55,8 @@ end
 
 agent_dtimes_agg = agent_times_agg{1} - [0; agent_times_agg{1}(1:end-1)] ;
 
-figure(2), clf,
-subplot(1,2,1), histogram(agent_dtimes_agg, 20), set(gca,'YScale','log')
+figure(3), clf,
+subplot(1,2,1), histogram(agent_dtimes_agg, 10), set(gca,'YScale','log')
 title('Agreggated time'), xlabel('Time per round')
 subplot(1,2,2), semilogy(agent_times_agg{1}, agent_dtimes_agg)
 title('Agreggated time'), xlabel('Negotiation time'), ylabel('Time per round'),
@@ -131,3 +134,19 @@ zlabel(['Third agent: ' agent_names{3}]),
 legend('bids', 'minimum_utility', 'nash point', 'max_triangle', agent_names{:}, 'Negotiation point')
 
 figure(4), clf,
+plot(agent_times_agg{1}, utilities3{1}(:,1), 'm'), hold on,
+plot(agent_times_agg{2}, utilities3{2}(:,2), 'g'), grid on,
+plot(agent_times_agg{3}, utilities3{3}(:,3), 'b'),
+title('Concession curves'), legend(agent_names{:}, 'Location', 'southwest'),
+
+figure(5), clf,
+plot(agent_times_agg{1}, utilities3{1}(:,1), 'm'), hold on,
+plot(agent_times_agg{1}, utilities3{1}(:,2), 'g'), grid on,
+plot(agent_times_agg{1}, utilities3{2}(:,3), 'b'),
+title('Utilities of agent 2 bids'), legend(agent_names{:}, 'Location', 'southwest'),
+
+figure(6), clf,
+plot(agent_times_agg{2}, utilities3{2}(:,1), 'm'), hold on,
+plot(agent_times_agg{2}, utilities3{2}(:,2), 'g'), grid on,
+plot(agent_times_agg{2}, utilities3{2}(:,3), 'b'),
+title('Utilities of agent 2 bids'), legend(agent_names{:}, 'Location', 'southwest'),

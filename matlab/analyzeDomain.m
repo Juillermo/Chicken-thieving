@@ -37,7 +37,7 @@ for j=1:n_issues
    issues{j} = issues{j} ./ (max_eval * ones(1, n_items(j)));
    
    weighted_issues{j} = issues{j}  .*  ( weights(:,j) * ones(1, n_items(j)) );
-   [ eval_names{j}{1:n_items} ] = profiles{i}(j).items.value;
+   [ eval_names{j}{1:n_items(j)} ] = profiles{i}(j).items.value;
    bid_space = bid_space * n_items(j);
 end
 

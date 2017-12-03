@@ -8,78 +8,71 @@ import negotiator.timeline.TimeLineInfo;
 import negotiator.boaframework.NegotiationSession;
 import negotiator.boaframework.SessionData;
 
-
 import negotiator.boaframework.opponentmodel.CUHKFrequencyModelV2;
+import negotiator.boaframework.opponentmodel.TheFawkes_OM;
+import negotiator.boaframework.opponentmodel.DefaultModel;
+import negotiator.boaframework.opponentmodel.UniformModel;
+import negotiator.boaframework.opponentmodel.BayesianModel;
+import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
+import negotiator.boaframework.opponentmodel.PerfectModel;
+import negotiator.boaframework.opponentmodel.OppositeModel;
 import negotiator.boaframework.opponentmodel.SmithFrequencyModel;
+import negotiator.boaframework.opponentmodel.SmithFrequencyModelV2;
+import negotiator.boaframework.opponentmodel.AgentLGModel;
+import negotiator.boaframework.opponentmodel.IAMhagglerBayesianModel;
+import negotiator.boaframework.opponentmodel.InoxAgent_OM;
+import negotiator.boaframework.opponentmodel.FSEGABayesianModel;
+import negotiator.boaframework.opponentmodel.PerfectIAMhagglerBayesianModel;
+import negotiator.boaframework.opponentmodel.ScalableBayesianModel;
+import negotiator.boaframework.NoModel;
+import negotiator.boaframework.opponentmodel.NashFrequencyModel;
+import negotiator.boaframework.opponentmodel.WorstModel;
 import negotiator.boaframework.opponentmodel.AgentXFrequencyModel;
+import negotiator.boaframework.opponentmodel.PerfectScalableBayesianModel;
 
-public class OMrepo{
-	
+public class OMrepo {
+
 	NegotiationSession ns;
-    SessionData s;
-    TimeLineInfo timeline;
-    NegotiationInfo ni;
-	
-	public OMrepo(NegotiationInfo info){
-		
-		ns=new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
-		s=new SessionData();
+	SessionData s;
+	TimeLineInfo timeline;
+	NegotiationInfo ni;
 
-		OpponentModel[] models_v = {
-				new PerfectModel(),
-				new DefaultModel(),
-				new InoxAgent_OM(),
-				new TheFawkes_OM(),
-				new NoModel(),
-				new HardHeadedFrequencyModel(),
-				new CUHKFrequencyModelV2(),
-				new UniformModel(),
-				new BayesianModel(),
-				new OppositeModel(),
-				new SmithFrequencyModel(),
-				new SmithFrequencyModelV2(),
-				new AgentLGModel(),
-				new IAMhagglerBayesianModel(),
-				new FSEGABayesianModel(),
-				new PerfectIAMhagglerBayesianModel(),
-				new ScalableBayesianModel(),
-				new NashFrequencyModel(),
-				new WorstModel(),
-				new AgentXFrequencyModel(),
-				new PerfectScalableBayesianModel(),
-			};
-		
-		//Map<String, Double> p= new HashMap<String,Double>();
+	public OMrepo(NegotiationInfo info) {
 
-		for(int i=0; i<models_v.length; i++)
-			models_v[i].init(ns, null);
-		
-		models = models_v;
+		ns = new NegotiationSession(s, info.getUtilitySpace(), info.getTimeline());
+		s = new SessionData();
 	}
-	
-	public OpponentModel[] getModels(){
-		OpponentModel[] models=new OpponentModel[3];
-		Map<String, Double> p= new HashMap<String,Double>();
-		String arg="l";
-		Double val=new Double(0.2);
-		p.put(arg, val);
-		models[0]=new CUHKFrequencyModelV2();
-		models[0].init(ns,p);
-		models[1]=new SmithFrequencyModel();
-		models[1].init(ns,p);
-		models[2]=new AgentXFrequencyModel();
-		models[2].init(ns,p);
-		
+
+	public OpponentModel[] getModels() {
+		OpponentModel[] models = { new CUHKFrequencyModelV2(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
+				new AgentLGModel(), new IAMhagglerBayesianModel(), new NashFrequencyModel(),
+				new AgentXFrequencyModel(), };
+
+		for (int i = 0; i < models.length; i++) {
+			Map<String, Double> p = new HashMap<String, Double>();
+			if (models[i] instanceof IAMhagglerBayesianModel) {
+				p.put("u", 0.0);
+				p.put("b", 1.0);
+			} else if (models[i] instanceof HardHeadedFrequencyModel) {
+				p.put("l", 0.2);
+			}
+			models[i].init(ns, null);
+		}
+
 		return models;
+
 	}
-	
-	public OpponentModel[] getModels(int n){
-		if(n>3)
-			n=3;
-		OpponentModel[] models=getModels();
-		OpponentModel[] nmodels=new OpponentModel[n];
-		for(int i=0;i<n;i++)
-			nmodels[i]=models[i];
+
+	public OpponentModel[] getModels(int n) {
+
+		OpponentModel[] models = getModels();
+		if (n > models.length)
+			n = models.length;
+		OpponentModel[] nmodels = new OpponentModel[n];
+
+		for (int i = 0; i < n; i++)
+			nmodels[i] = models[i];
+
 		return nmodels;
 	}
 }
