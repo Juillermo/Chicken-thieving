@@ -42,26 +42,36 @@ public class OMrepo{
 		ns = new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
 		s = new SessionData();
 	  
-		models = new OpponentModel[6];
-		Map<String, Double> p= new HashMap<String,Double>();
+		OpponentModel[] models_v = {
+				new PerfectModel(),
+				new DefaultModel(),
+				new InoxAgent_OM(),
+				new TheFawkes_OM(),
+				new NoModel(),
+				new HardHeadedFrequencyModel(),
+				new CUHKFrequencyModelV2(),
+				new UniformModel(),
+				new BayesianModel(),
+				new OppositeModel(),
+				new SmithFrequencyModel(),
+				new SmithFrequencyModelV2(),
+				new AgentLGModel(),
+				new IAMhagglerBayesianModel(),
+				new FSEGABayesianModel(),
+				new PerfectIAMhagglerBayesianModel(),
+				new ScalableBayesianModel(),
+				new NashFrequencyModel(),
+				new WorstModel(),
+				new AgentXFrequencyModel(),
+				new PerfectScalableBayesianModel(),
+			};
 		
-		models[0] = new PerfectModel();
-		models[0].init(ns, null);
+		//Map<String, Double> p= new HashMap<String,Double>();
+
+		for(int i=0; i<models_v.length; i++)
+			models_v[i].init(ns, null);
 		
-		models[1] = new DefaultModel();
-		models[1].init(ns, null);
-		
-		models[2] = new InoxAgent_OM();
-		models[2].init(ns, null);
-		
-		models[3] = new TheFawkes_OM();
-		models[3].init(ns, null);
-		
-		models[4] = new NoModel();
-		models[4].init(ns, null);
-		
-		models[5] = new HardHeadedFrequencyModel();
-		models[5].init(ns,p);
+		models = models_v;
 	}
 	
 	public OpponentModel[] getModels(){
