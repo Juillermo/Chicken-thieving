@@ -54,6 +54,9 @@ public class Don extends AbstractNegotiationParty {
    double phase3Aat;
 	ModelDomain md;
 	Bid onTable;
+	int afterUs;
+	boolean chooseActionFlag;
+	boolean setOrderFlag;
 	/**
 	 * init is called when a nxt session starts with the same opponent.
 	 */
@@ -94,8 +97,9 @@ public class Don extends AbstractNegotiationParty {
         phase3at=0.9;
         phase4at=0.98;
         onTable=null;
-        
-	
+        chooseActionFlag=false;
+        afterUs=-1;
+	    setOrderFlag=false;
 		
 	}
 
@@ -118,6 +122,9 @@ public class Don extends AbstractNegotiationParty {
     public void receiveMessage(AgentID sender, Action act) {
         super.receiveMessage(sender, act);
         int ag = getAgentId(sender);
+        if(chooseActionFlag && !setOrderFlag)
+        	{setOrderFlag=true;afterUs=ag;}
+        	
        if (act instanceof Offer) { // sender is making an offer
             Offer offer = (Offer) act;
             try {
@@ -130,9 +137,9 @@ public class Don extends AbstractNegotiationParty {
             lastReceivedOffer = offer.getBid();
             onTable=lastReceivedOffer;
         }
-       else if(ag==1 && act instanceof Accept){
-    	   if(backup==null || (getUtility(backup)<getUtility(lastReceivedOffer)))
-    		   {backup=lastReceivedOffer;System.out.println("backup util is"+ getUtility(backup));phase3at=phase3Aat;}
+       else if(setOrderFlag && ag!=afterUs && act instanceof Accept){
+    	   if(backup==null || (getUtility(backup)<getUtility(onTable)))
+    		   {backup=onTable;System.out.println("backup util is"+ getUtility(backup)+"at round "+ rounds);phase3at=phase3Aat;}
     	      		   
        }
         
@@ -143,7 +150,7 @@ public class Don extends AbstractNegotiationParty {
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> classes) {
 		
-		
+		chooseActionFlag=true;
 rounds++;
     	
     	double time = getTimeLine().getTime();
@@ -152,12 +159,14 @@ rounds++;
     	int rem=t.getRemRounds(time);
     	double thresh;
     	Bid b=null;
+    	System.out.println("rem "+rem);
     	if(rem<=1)
     		{System.out.println("last");
     		action =  new Accept(this.getPartyId(),lastReceivedOffer);
     		return action;
     		}
     	else if((time>phase4at || rem<5) && backup!=null){
+    		System.out.println("Offering backup");
     		b= backup;
     	}
     	else if(time>phase3at && nashflag){
@@ -180,6 +189,7 @@ rounds++;
             }
     	if (b!=null){
             myLastOffer = b;
+       
             action=new Offer(this.getPartyId(), myLastOffer);;
             
         }
@@ -258,7 +268,7 @@ rounds++;
     	double theta= Math.pow(time,(1.0/e));
     	double thresh = Pmin+(Pmax-Pmin)*(1-theta);		
     	double ut=getUtility(getNashBids(1).get(0).getBid());
-    	System.out.println("utility at nash is "+ut);
+    	
 		Pmin=ut-0.05;
 		thresh = Pmin+(Pmax-Pmin)*(1-theta);
 		
