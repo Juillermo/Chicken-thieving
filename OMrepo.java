@@ -8,30 +8,13 @@ import negotiator.timeline.TimeLineInfo;
 import negotiator.boaframework.NegotiationSession;
 import negotiator.boaframework.SessionData;
 
+
 import negotiator.boaframework.opponentmodel.CUHKFrequencyModelV2;
-import negotiator.boaframework.opponentmodel.TheFawkes_OM;
-import negotiator.boaframework.opponentmodel.DefaultModel;
-import negotiator.boaframework.opponentmodel.UniformModel;
-import negotiator.boaframework.opponentmodel.BayesianModel;
-import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
-import negotiator.boaframework.opponentmodel.PerfectModel;
-import negotiator.boaframework.opponentmodel.OppositeModel;
 import negotiator.boaframework.opponentmodel.SmithFrequencyModel;
-import negotiator.boaframework.opponentmodel.SmithFrequencyModelV2;
-import negotiator.boaframework.opponentmodel.AgentLGModel;
-import negotiator.boaframework.opponentmodel.IAMhagglerBayesianModel;
-import negotiator.boaframework.opponentmodel.InoxAgent_OM;
-import negotiator.boaframework.opponentmodel.FSEGABayesianModel;
-import negotiator.boaframework.opponentmodel.PerfectIAMhagglerBayesianModel;
-import negotiator.boaframework.opponentmodel.ScalableBayesianModel;
-import negotiator.boaframework.NoModel;
-import negotiator.boaframework.opponentmodel.NashFrequencyModel;
-import negotiator.boaframework.opponentmodel.WorstModel;
 import negotiator.boaframework.opponentmodel.AgentXFrequencyModel;
-import negotiator.boaframework.opponentmodel.PerfectScalableBayesianModel;
 
 public class OMrepo{
-	OpponentModel[] models;
+	
 	NegotiationSession ns;
     SessionData s;
     TimeLineInfo timeline;
@@ -39,9 +22,9 @@ public class OMrepo{
 	
 	public OMrepo(NegotiationInfo info){
 		
-		ns = new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
-		s = new SessionData();
-	  
+		ns=new NegotiationSession(s, info.getUtilitySpace(),info.getTimeline());
+		s=new SessionData();
+
 		OpponentModel[] models_v = {
 				new PerfectModel(),
 				new DefaultModel(),
@@ -75,6 +58,28 @@ public class OMrepo{
 	}
 	
 	public OpponentModel[] getModels(){
+		OpponentModel[] models=new OpponentModel[3];
+		Map<String, Double> p= new HashMap<String,Double>();
+		String arg="l";
+		Double val=new Double(0.2);
+		p.put(arg, val);
+		models[0]=new CUHKFrequencyModelV2();
+		models[0].init(ns,p);
+		models[1]=new SmithFrequencyModel();
+		models[1].init(ns,p);
+		models[2]=new AgentXFrequencyModel();
+		models[2].init(ns,p);
+		
 		return models;
+	}
+	
+	public OpponentModel[] getModels(int n){
+		if(n>3)
+			n=3;
+		OpponentModel[] models=getModels();
+		OpponentModel[] nmodels=new OpponentModel[n];
+		for(int i=0;i<n;i++)
+			nmodels[i]=models[i];
+		return nmodels;
 	}
 }
