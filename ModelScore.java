@@ -81,7 +81,7 @@ public class ModelScore {
 	}
 
 	public OpponentModel getBestOm() {
-		double best = 0;
+		double best = -1;
 		OpponentModel bestOm = null;
 		for (int i = 0; i < oms.length; i++) {
 			//System.out.println("Model " + i + " score " + score[i].score());
@@ -95,7 +95,7 @@ public class ModelScore {
 	}
 
 	public int getBestOmId() {
-		double best = 0;
+		double best = -1;
 		int bestid = -1;
 		for (int i = 0; i < oms.length; i++) {
 			if (score[i].score() > best) {

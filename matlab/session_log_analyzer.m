@@ -8,7 +8,7 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'log'];
-log_name = 'Log-Session_20171204-140833';
+log_name = 'Log-Session_20171204-163459';
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
@@ -175,4 +175,5 @@ for i = 1:3
     
     figure(8),
     subplot(1,3,i), histogram( find(acceptances{i}) / size(acceptances{i},1) ),
+    title(['Acceptances of agent ' agent_names{i}]),
 end

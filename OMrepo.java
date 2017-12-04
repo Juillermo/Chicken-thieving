@@ -44,9 +44,8 @@ public class OMrepo {
 	}
 
 	public OpponentModel[] getModels() {
-		OpponentModel[] models = { new CUHKFrequencyModelV2(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
-				new AgentLGModel(), new IAMhagglerBayesianModel(), new NashFrequencyModel(),
-				new AgentXFrequencyModel(), };
+		OpponentModel[] models = { new AgentXFrequencyModel(), new CUHKFrequencyModelV2(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
+				new AgentLGModel(), new NashFrequencyModel(), };
 
 		for (int i = 0; i < models.length; i++) {
 			Map<String, Double> p = new HashMap<String, Double>();
@@ -55,6 +54,8 @@ public class OMrepo {
 				p.put("b", 1.0);
 			} else if (models[i] instanceof HardHeadedFrequencyModel) {
 				p.put("l", 0.2);
+			} else if (models[i] instanceof WindowedOpponentModel) {
+				p.put("w", 100);
 			}
 			models[i].init(ns, null);
 		}

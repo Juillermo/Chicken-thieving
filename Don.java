@@ -236,7 +236,7 @@ public class Don extends AbstractNegotiationParty {
 		ms[1].printState(nashBid);
 
 		System.out.println("Don: There were " + finalRounds + " final rounds.");
-		System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackups + " times.");
+		System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
 
 		return null;
 	}
