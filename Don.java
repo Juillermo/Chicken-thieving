@@ -2,7 +2,7 @@
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-
+import java.util.Comparator;
 import negotiator.AgentID;
 import negotiator.Bid;
 import negotiator.BidIterator;
@@ -99,9 +99,9 @@ public class Don extends AbstractNegotiationParty {
 		phase3bids = null;
 
 		phase2at = 0.5;
-		phase3Aat = 0.95;
-		phase3at = 0.9;
-		phase4at = 0.98;
+		
+		phase3at = 0.95;
+		phase4at = 0.99;
 		onTable = null;
 		chooseActionFlag = false;
 		afterUs = -1;
@@ -159,7 +159,7 @@ public class Don extends AbstractNegotiationParty {
 				System.out.println("Don: New backup bid is" + getUtility(backup) + "at round " + rounds);
 				nBackups++;
 
-				phase3at = phase3Aat;
+				
 			}
 
 		}
@@ -189,13 +189,21 @@ public class Don extends AbstractNegotiationParty {
 			bidToOffer = backup;
 			nBackupsOffered++;
 
-		} else if (time > phase3at && nashflag) {
+		} else if ((time > phase3at || rem<modelDomain.getSize()) && nashflag) {
+			if (modelDomain.getSize() <= 5000) {
+				nashflag = false;
+				computeNash();
+				sortBids(nashbids,NashBidDetails.nashComparator);
+				nashflag=true;
+			}
+
 			bidToOffer = phase3bid(rem);
 			System.out.println("Don: In phase 3");
 
 		} else if (time > phase2at && ms[0].confident(100, 5) && ms[1].confident(100, 5)) {
 			if (!nashflag) {
-				sortNash();
+				computeNash();
+				sortBids(nashbids,NashBidDetails.nashComparator);
 				nashflag = true;
 			}
 			bidToOffer = phase2bid(time);
@@ -246,19 +254,22 @@ public class Don extends AbstractNegotiationParty {
 			int i = 0;
 			phase3bids = new ArrayList<NashBidDetails>();
 
-			while (i < rem) {
-				if (i < (Math.ceil(modelDomain.getSize() / 8)))
+			while (i < (Math.ceil(modelDomain.getSize() / 8))) {
+				if (backup != null
+						&& getUtility(nashbids.get(i).getBid()) > getUtility(backup))
 					phase3bids.add(nashbids.get(i));
-				else
-					phase3bids.add(nashbids.get(i % (int) (Math.ceil(modelDomain.getSize() / 8))));
+
 				i++;
 			}
+			sortBids(phase3bids, NashBidDetails.utComparator);
 		}
+
 		phase3count++;
 		if (phase3count > phase3bids.size())
 			phase3count = 1;
-
-		return phase3bids.get(phase3count - 1).getBid();
+		int repeat = (int) Math.floor(rem / phase3bids.size());
+		int index = (int) Math.floor((phase3count - 1) / repeat);
+		return phase3bids.get(index).getBid();
 	}
 
 	public Bid phase2bid(double time) {
@@ -350,19 +361,22 @@ public class Don extends AbstractNegotiationParty {
 		return v1 * v2 * v3;
 	}
 
-	public void sortNash() {
+	public void computeNash() {
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
 		nashbids = new ArrayList<NashBidDetails>();
 		Bid bid;
 		NashBidDetails nbid;
-
 		while (bidIterator.hasNext()) {
 			bid = bidIterator.next();
 			nbid = new NashBidDetails(bid, getUtility(bid), nashProduct(bid));
 			nashbids.add(nbid);
 		}
 
-		Collections.sort(nashbids, Collections.reverseOrder(NashBidDetails.weightedComparator));
+	}
+
+	public void sortBids(List<NashBidDetails> nb,
+			Comparator<NashBidDetails> comp) {
+		Collections.sort(nb, Collections.reverseOrder(comp));
 	}
 
 	public List<NashBidDetails> getNashBids(int n) {
