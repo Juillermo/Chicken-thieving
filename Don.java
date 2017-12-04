@@ -190,7 +190,7 @@ public class Don extends AbstractNegotiationParty {
 			nBackupsOffered++;
 
 		} else if ((time > phase3at || rem<modelDomain.getSize()) && nashflag) {
-			if (md.getSize() <= 5000) {
+			if (modelDomain.getSize() <= 5000) {
 				nashflag = false;
 				computeNash();
 				sortBids(nashbids,NashBidDetails.nashComparator);
