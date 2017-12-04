@@ -35,10 +35,10 @@ public class WindowedOpponentModel extends OpponentModel {
     public WindowedOpponentModel() {
     }
 
-    public void init(List<Issue> issuesList, int windowsize) {
-        issues = issuesList;
+    public void init(NegotiationSession ns, Map<String,Double> p) {
+        issues = ns.getIssues();
         this.initModel();
-        windowSize = windowsize;
+        windowSize = p.get("w").intValue();
         counter = 0;
         window = new ArrayList<Bid>();
     }
