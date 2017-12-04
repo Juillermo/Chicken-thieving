@@ -11,8 +11,8 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'logs'];
-log_name = 'boa_prueba.csv';
-n_sessions = 6; % Number of sessions per sub-tournament (in one domain)
+log_name = 'four_agents.csv';
+n_agents = 4; % Number of agents in the tournament (without repetition)
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
@@ -28,17 +28,22 @@ end
 %% Reading the log
 table = readtable( log_name );
 
-tot_sessions = size( table.(1), 1)
-n_tournaments = tot_sessions / n_sesions;
+tot_sessions = size( table.(1), 1);
+n_sessions = factorial(n_agents);
+n_tournaments = tot_sessions / n_sessions;
 
 % Initializing variables
+profiles = cell(n_tournaments, 3); % 3 profiles
+
 nsubp = 3; % For plotting
 times = zeros(n_sessions, n_tournaments);
 rounds = zeros(n_sessions, n_tournaments);
 nash = zeros(n_sessions, n_tournaments);
-profiles = cell(n_tournaments, 3);
-utilities = zeros(n_sessions, 3, n_tournaments);
-u_domain = zeros(n_sessions/3, 3, 3, n_tournaments);
+
+n_agreements = zeros(n_agents, n_tournaments);
+nashes = zeros(n_sessions, n_agents, n_tournaments);
+utilities = zeros(n_sessions, n_agents, n_tournaments);
+u_domain = zeros(n_sessions/n_agents, n_agents, 3, n_tournaments); % 3 profiles
 
 for i_tour = 1 : n_tournaments
     % Take rows in batches of n_sessions
@@ -46,38 +51,49 @@ for i_tour = 1 : n_tournaments
 
     times(:, i_tour) = sub_table.(1);
     rounds(:, i_tour) = sub_table.Round;
+    agreements = sub_table.Agreement;
     nash (:, i_tour) = sub_table.(11);
     profiles(i_tour,:) = sub_table{1, 22:24};
 
     % Extracting agents names
     
     agentnames = sub_table{:,13:15};
-    an0 = regexp(agentnames(1,:), '@', 'split');
+    an0 = regexp(agentnames(:), '@', 'split');
     
-    for i = 1:n_sessions
-        agentnames = sub_table{:,13:15};
-        an0 = regexp(agentnames(1,:), '@', 'split');
+    names = {};
+    %names = cell(n_agents,1);
+    for j = 1:size(an0, 1)
+        same = 0;
+        for i = 1:size(names,2)
+            same = same + strcmp( an0{j}{1}, names{i});
+        end
+        if ~(same)
+            names{end+1} = an0{j}{1};
+        end
     end
-    
-    names = {an0{1}{1} an0{2}{1} an0{3}{1}};
 
     
     % ** Assigning utilities to correct agents **
     
-    idom = ones(3);
+    idom = ones(n_agents, 3);
 
     for i=1:n_sessions
         an = regexp(agentnames(i,:), '@', 'split');
         an = {an{1}{1} an{2}{1} an{3}{1}};
 
-        for j=1:3 % Domain profile
-            for k=1:3 % Agent
+        for j=1:3 % Domain profiles
+            for k=1:size(names,2) % Agent
                 if strcmp(an{j}, names{k})
 
                     utilities(i,k,i_tour) = sub_table{i, 15+j};
+                    nashes(i,k,i_tour) = nash(i,i_tour);
 
                     u_domain(idom(k,j), k, j, i_tour) = sub_table{i, 15+j};
                     idom(k,j) = idom(k,j) + 1;
+                    
+                    if strcmp( agreements{i}, 'Yes')
+                        n_agreements(k,i_tour) = n_agreements(k,i_tour) + 1;
+                    end
                 end
             end
         end
@@ -101,21 +117,12 @@ for i_tour = 1:n_tournaments
     [umax, umin, bid_space] = analyzeDomain(genius_dir, profile_name, profile_nums);
     
     % Display data
-    sub_table = table((i_tour-1)*6+1 : i_tour*6, :);
+    sub_table = table((i_tour-1)*n_sessions+1 : i_tour*n_sessions, :);
     
-    agreements = sub_table.Agreement;
-    n_agreements = 0;
-    for i=1:n_sessions
-        if strcmp( agreements{i}, 'Yes')
-            n_agreements = n_agreements + 1;
-        end
-    end
-    n_agreements
-    
-    an0 = regexp(sub_table{1,13:15}, '@', 'split');
-    names = {an0{1}{1} an0{2}{1} an0{3}{1}};
-    
-    umeans = mean(utilities(:,:,i_tour))
+    sessions_per_agent = factorial(n_agents)-factorial(n_agents-1)
+    n_agreements(:,i_tour)'
+    umeans = sum( utilities(:,:,i_tour) )/sessions_per_agent
+    nashmeans = sum( nashes(:,:,i_tour) )/sessions_per_agent
     
     % Plot utilities
     figure(1),
@@ -123,13 +130,13 @@ for i_tour = 1:n_tournaments
     plot3([0 1],[0 1],[0 1])
   
     figure(2), clf
-    subplot(121), plot(utilities(:,:,i_tour), ':x'), legend(names, 'Location', 'south'),
+    subplot(n_tournaments,2,2*(i_tour-1)+1), plot(utilities(:,:,i_tour), ':x'), legend(names, 'Location', 'south'),
     title('Utilities through different negotiation sessions'), ylim([0 1])
 
-    subplot(122)
+    subplot(n_tournaments,2,2*(i_tour-1)+2)
     plot([u_domain(:,:,1,i_tour); u_domain(:,:,2,i_tour); u_domain(:,:,3,i_tour)], ':x')
     legend(names, 'Location', 'south'), grid on,
-    set(gca, 'Xtick', 0.5:n_sessions/3:n_sessions)
+    set(gca, 'Xtick', 0.5:n_sessions/factorial(n_agents-1):n_sessions)
     title('Utilities at different domain preferences'), ylim([0 1])
     umax;
 end

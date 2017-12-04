@@ -19,20 +19,20 @@ public class ModelScore {
 
 	OpponentModel[] oms;
 	Score[] score;
-	TimeLineInfo timeline;
-	AgentID agent;
 	NegotiationInfo ni;
-	AbstractUtilitySpace u;
+	int modelChanges;
+	OpponentModel lastBestOm;
 
 	public ModelScore(NegotiationInfo info, OpponentModel[] models) {
 
-		timeline = info.getTimeline();
 		oms = models;
 		score = new Score[models.length];
 		for (int i = 0; i < models.length; i++)
 			score[i] = new Score();
 		ni = info;
-		u = ni.getUtilitySpace();
+
+		modelChanges = 0;
+		lastBestOm = oms[0];
 	}
 
 	public void updateModels(Action act, TimeLineInfo timeline, Bid bidOnTable) throws Exception {
@@ -45,7 +45,6 @@ public class ModelScore {
 			for (int i = 0; i < oms.length; i++) {
 				oms[i].updateModel(bidOffered, time);
 			}
-
 		}
 
 	}
@@ -84,13 +83,15 @@ public class ModelScore {
 		double best = -1;
 		OpponentModel bestOm = null;
 		for (int i = 0; i < oms.length; i++) {
-			//System.out.println("Model " + i + " score " + score[i].score());
+			// System.out.println("Model " + i + " score " + score[i].score());
 			if (score[i].score() > best) {
 				best = score[i].score();
 				bestOm = oms[i];
 			}
-
 		}
+		if (bestOm != lastBestOm)
+			modelChanges++;
+
 		return bestOm;
 	}
 
@@ -119,7 +120,7 @@ public class ModelScore {
 			}
 
 		}
-		System.out.println("Best model is " + bestOm.getName());
+		System.out.println("Best model is " + bestOm.getName() + ", after " + modelChanges + " changes.");
 	}
 
 }

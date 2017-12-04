@@ -22,7 +22,7 @@ public class Don extends AbstractNegotiationParty {
 
 	private
 
-	final String description = "Observer Agent";
+	final String description = "I'm gonna make him an offer he can't refuse";
 	Bid lastReceivedOffer; // offer on the table
 	Bid myLastOffer;
 	ModelTime t;
@@ -80,8 +80,8 @@ public class Don extends AbstractNegotiationParty {
 		ms = new ModelScore[2];
 		ms[0] = new ModelScore(info, models[0]);
 		ms[1] = new ModelScore(info, models[1]);
-		ms[0].printState(getMaxUtilityBid());
-		ms[1].printState(getMaxUtilityBid());
+		//ms[0].printState(getMaxUtilityBid());
+		//ms[1].printState(getMaxUtilityBid());
 
 		pmin = 0;
 		MINIMUM_BID_UTILITY = utilitySpace.getReservationValueUndiscounted();
@@ -175,7 +175,6 @@ public class Don extends AbstractNegotiationParty {
 		t.model(time);
 		Action action = null;
 		int rem = t.getRemRounds(time);
-		double thresh;
 		Bid bidToOffer = null;
 		System.out.println("Don: Remaining rounds: " + rem);
 		if (rem <= 1 && time > phase3at) {

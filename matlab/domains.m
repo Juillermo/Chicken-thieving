@@ -10,7 +10,7 @@ profiles_dir = 'etc/templates/ANAC2015/group7-movie';
 profile_name = 'movie-profile';
 n_profiles = 9;
 
-profile_nums = [2 3 4];
+profile_nums = [2 5 9];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
 allCombinations(n_profiles, [genius_dir profiles_dir], profile_name)
@@ -20,7 +20,7 @@ profiles_dir = 'etc/templates/ANAC2015/group11-car_purchase';
 profile_name = 'car_purchase_util';
 n_profiles = 9;
 
-profile_nums = [1 2 3];
+profile_nums = [1 3 4];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
 allCombinations(n_profiles, [genius_dir profiles_dir], profile_name)
@@ -30,7 +30,7 @@ profiles_dir = 'etc/templates/ANAC2015/group5-car_domain';
 profile_name = 'car-Profile';
 n_profiles = 9;
 
-profile_nums = [1 3 5];
+profile_nums = [4 7 9];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
 allCombinations(n_profiles, [genius_dir profiles_dir], profile_name)

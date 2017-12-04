@@ -55,7 +55,7 @@ public class OMrepo {
 			} else if (models[i] instanceof HardHeadedFrequencyModel) {
 				p.put("l", 0.2);
 			} else if (models[i] instanceof WindowedOpponentModel) {
-				p.put("w", 100);
+				p.put("w", 100.0);
 			}
 			models[i].init(ns, null);
 		}
