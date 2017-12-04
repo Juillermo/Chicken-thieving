@@ -194,6 +194,7 @@ public class Don extends AbstractNegotiationParty {
 				nashflag = false;
 				computeNash();
 				sortBids(nashbids,NashBidDetails.nashComparator);
+				nashflag=true;
 			}
 
 			bidToOffer = phase3bid(rem);
