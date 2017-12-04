@@ -1,0 +1,9 @@
+<?xml version="1.0" ?><Session>
+<NegotiationOutcome currentTime="Mon Dec 04 14:11:33 GMT 2017" lastAction="(Offer  bid:Bid[06-09: 25 kW,, 09-19: 100 kW,, 19-22: 75 kW,, 22-06: 0 kW,, ])" domain="etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid.xml" bids="59866" runtime="180.000002497" finalOutcome="-" startingAgent="-" deadline="180s">
+<resultsOfAgent agent="Atlas32016@0" agentDesc="ANAC2016 Atlas3" utilspace="etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util1.xml" agentClass="agents.anac.y2016.atlas3.Atlas32016" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+<resultsOfAgent agent="Don@1" agentDesc="Observer Agent" utilspace="etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util2.xml" agentClass="Don" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+<resultsOfAgent agent="Agent16C@2" agentDesc="GengisKan" utilspace="etc/templates/ANAC2016/AgentLightSmartGrid/SmartEnergyGrid_util3.xml" agentClass="Agent16C" finalUtility="0.0" discountedUtility="0.0" discount="1.0">
+</resultsOfAgent>
+</NegotiationOutcome></Session>

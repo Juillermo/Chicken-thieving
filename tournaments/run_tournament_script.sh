@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd ..//..//../genius
-java -cp negosimulator.jar negotiator.xml.multipartyrunner.Runner ../src/Chicken-thieving/tournaments/tournBOA.xml
+java -cp negosimulator.jar negotiator.xml.multipartyrunner.Runner ../src/Chicken-thieving/tournaments/tournBIGnightOut.xml

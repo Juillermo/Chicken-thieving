@@ -53,6 +53,10 @@ public class Don extends AbstractNegotiationParty {
 	boolean chooseActionFlag;
 	boolean setOrderFlag;
 
+	int finalRounds;
+	int nBackups;
+	int nBackupsOffered;
+
 	/**
 	 * init is called when a nxt session starts with the same opponent.
 	 */
@@ -102,6 +106,10 @@ public class Don extends AbstractNegotiationParty {
 		chooseActionFlag = false;
 		afterUs = -1;
 		setOrderFlag = false;
+
+		finalRounds = 0;
+		nBackups = 0;
+		nBackupsOffered = 0;
 	}
 
 	@Override
@@ -146,8 +154,11 @@ public class Don extends AbstractNegotiationParty {
 
 		} else if (setOrderFlag && ag != afterUs && act instanceof Accept) {
 			if (backup == null || (getUtility(backup) < getUtility(onTable))) {
+
 				backup = onTable;
-				System.out.println("backup util is" + getUtility(backup) + "at round " + rounds);
+				System.out.println("Don: New backup bid is" + getUtility(backup) + "at round " + rounds);
+				nBackups++;
+
 				phase3at = phase3Aat;
 			}
 
@@ -165,63 +176,68 @@ public class Don extends AbstractNegotiationParty {
 		Action action = null;
 		int rem = t.getRemRounds(time);
 		double thresh;
-		Bid b = null;
+		Bid bidToOffer = null;
 		System.out.println("Don: Remaining rounds: " + rem);
 		if (rem <= 1 && time > phase3at) {
 			System.out.println("Don: Last round!? Time: " + time + ", max time per round: " + t.maxtime);
+			finalRounds++;
 			action = new Accept(this.getPartyId(), lastReceivedOffer);
 			return action;
 
 		} else if ((time > phase4at || rem < 5) && backup != null) {
-			System.out.println("Don: Offering backup");
-			b = backup;
+			System.out.println("Don: Offering backup, since only "+rem+" rounds left");
+			bidToOffer = backup;
+			nBackupsOffered++;
 
 		} else if (time > phase3at && nashflag) {
-			b = phase3bid(rem);
-			System.out.println("Don: Entering phase 3");
+			bidToOffer = phase3bid(rem);
+			System.out.println("Don: In phase 3");
 
 		} else if (time > phase2at && ms[0].confident(100, 5) && ms[1].confident(100, 5)) {
 			if (!nashflag) {
 				sortNash();
 				nashflag = true;
 			}
-			b = phase2bid(time);
+			bidToOffer = phase2bid(time);
 		} else {
-			b = phase1bid(time);
+			bidToOffer = phase1bid(time);
 		}
 
-		if (b != null) {
-			myLastOffer = b;
-			action = new Offer(this.getPartyId(), myLastOffer);
-
+		if (bidToOffer != null) {
+			action = new Offer(this.getPartyId(), bidToOffer);
 		} else {
-			System.out.println("Don: b is null");
-			myLastOffer = getMaxUtilityBid();
-			action = new Offer(this.getPartyId(), myLastOffer);
+			System.out.println("Don: bidToOffer is null");
+			bidToOffer = getMaxUtilityBid();
+			action = new Offer(this.getPartyId(), bidToOffer);
 		}
 
-		if (getUtility(myLastOffer) <= getUtility(lastReceivedOffer)) {
+		if (getUtility(bidToOffer) <= getUtility(lastReceivedOffer)) {
 
-			if (backup != null && getUtility(lastReceivedOffer) <= getUtility(backup))
+			if (backup != null && getUtility(lastReceivedOffer) <= getUtility(backup)) {
 				action = new Offer(this.getPartyId(), backup);
-			else
+				nBackupsOffered++;
+			} else
 				action = new Accept(this.getPartyId(), lastReceivedOffer);
 		}
 
 		if (action instanceof Offer)
 			onTable = ((Offer) action).getBid();
 
+		myLastOffer = bidToOffer;
 		return action;
 	}
 
 	@Override
 	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(Bid acceptedBid) {
 		Bid nashBid = getNashBids(1).get(0).getBid();
-		
+
 		System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
 		ms[0].printState(nashBid);
 		ms[1].printState(nashBid);
-		
+
+		System.out.println("Don: There were " + finalRounds + " final rounds.");
+		System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackups + " times.");
+
 		return null;
 	}
 
@@ -241,7 +257,7 @@ public class Don extends AbstractNegotiationParty {
 		phase3count++;
 		if (phase3count > phase3bids.size())
 			phase3count = 1;
-		
+
 		return phase3bids.get(phase3count - 1).getBid();
 	}
 

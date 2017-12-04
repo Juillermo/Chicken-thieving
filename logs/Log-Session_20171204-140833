@@ -1,0 +1,139 @@
+Don: Remaining rounds: 56
+Don: Offering backup
+Don: Remaining rounds: 56
+Don: Offering backup
+Don: Remaining rounds: 55
+Don: Offering backup
+Don: Remaining rounds: 56
+Don: Offering backup
+Don: Remaining rounds: 55
+Don: Offering backup
+Don: Remaining rounds: 54
+Don: Offering backup
+Don: Remaining rounds: 53
+Don: Offering backup
+Don: Remaining rounds: 52
+Don: Offering backup
+Don: Remaining rounds: 53
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 39
+Don: Offering backup
+Don: Remaining rounds: 39
+Don: Offering backup
+Don: Remaining rounds: 40
+Don: Offering backup
+Don: Remaining rounds: 41
+Don: Offering backup
+Don: Remaining rounds: 40
+Don: Offering backup
+Don: Remaining rounds: 39
+Don: Offering backup
+Don: Remaining rounds: 32
+Don: Offering backup
+Don: Remaining rounds: 31
+Don: Offering backup
+Don: Remaining rounds: 30
+Don: Offering backup
+Don: Remaining rounds: 29
+Don: Offering backup
+Don: Remaining rounds: 28
+Don: Offering backup
+Don: Remaining rounds: 29
+Don: Offering backup
+Don: Remaining rounds: 28
+Don: Offering backup
+Don: Remaining rounds: 28
+Don: Offering backup
+Don: Remaining rounds: 27
+Don: Offering backup
+Don: Remaining rounds: 27
+Don: Offering backup
+Don: Remaining rounds: 26
+Don: Offering backup
+Don: Remaining rounds: 25
+Don: Offering backup
+Don: Remaining rounds: 24
+Don: Offering backup
+Don: Remaining rounds: 24
+Don: Offering backup
+Don: Remaining rounds: 23
+Don: Offering backup
+Don: Remaining rounds: 22
+Don: Offering backup
+Don: Remaining rounds: 21
+Don: Offering backup
+Don: Remaining rounds: 20
+Don: Offering backup
+Don: Remaining rounds: 19
+Don: Offering backup
+Don: Remaining rounds: 16
+Don: Offering backup
+Don: Remaining rounds: 15
+Don: Offering backup
+Don: Remaining rounds: 15
+Don: Offering backup
+Don: Remaining rounds: 13
+Don: Offering backup
+Don: Remaining rounds: 12
+Don: Offering backup
+Don: Remaining rounds: 11
+Don: Offering backup
+Don: Remaining rounds: 10
+Don: Offering backup
+Don: Remaining rounds: 9
+Don: Offering backup
+Don: Remaining rounds: 9
+Don: Offering backup
+Don: Remaining rounds: 8
+Don: Offering backup
+Don: Remaining rounds: 7
+Don: Offering backup
+Don: Remaining rounds: 6
+Don: Offering backup
+Don: Remaining rounds: 5
+Don: Offering backup
+Don: Remaining rounds: 4
+Don: Offering backup
+Don: Remaining rounds: 4
+Don: Offering backup
+Don: Remaining rounds: 3
+Don: Offering backup
+Don: Remaining rounds: 2
+Don: Offering backup
+Don: Remaining rounds: 1
+Don: Last round!? Time: 0.9998960090888889, max time per round: 7.501329999992645E-5
+Don: Remaining rounds: 0
+Don: Last round!? Time: 0.9999617571888889, max time per round: 7.501329999992645E-5
+Deadline reached. Deadline:180s
+Don: Our utility for Nash is 0.7250163383509155
+------------------------------------
+Score 9199 model CUHK Frequency Model V2 utility of opponent 0.7345523607614505
+Score 9197 model Smith Frequency Model utility of opponent 0.6162123275963849
+Score 9197 model Smith Frequency Model V2 utility of opponent 0.6162123275963849
+Score 9193 model AgentLG Model utility of opponent 0.6265217984342685
+Score 9101 model IAMhaggler Bayesian Model utility of opponent 1.0
+Score 9199 model NASH Frequency Model utility of opponent 0.7298363699663456
+Score 9133 model AgentX Frequency Model utility of opponent 0.783084257368314
+Best model is CUHK Frequency Model V2
+------------------------------------
+Score 23139 model CUHK Frequency Model V2 utility of opponent 0.6882009279957921
+Score 22465 model Smith Frequency Model utility of opponent 0.4174899080504817
+Score 22465 model Smith Frequency Model V2 utility of opponent 0.4174899080504817
+Score 23777 model AgentLG Model utility of opponent 0.75
+Score 19421 model IAMhaggler Bayesian Model utility of opponent 1.0
+Score 23205 model NASH Frequency Model utility of opponent 0.6790484013263971
+Score 24437 model AgentX Frequency Model utility of opponent 0.7593338988719399
+Best model is AgentX Frequency Model
+Don: There were 2 final rounds.
+Don: There were 13 backups that have been offered 13 times.
+Negotiation session has stopped.

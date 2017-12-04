@@ -1,5 +1,5 @@
 #Set path to csv file here
-    fname ="tournament.csv"
+fname ="tournament-20171203-224208-car_domain.log.csv"
 
 def getinfo():
     log=[]

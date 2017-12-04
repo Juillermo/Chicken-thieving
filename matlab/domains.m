@@ -30,7 +30,7 @@ profiles_dir = 'etc/templates/ANAC2015/group5-car_domain';
 profile_name = 'car-Profile';
 n_profiles = 9;
 
-profile_nums = [1 2 3];
+profile_nums = [1 3 5];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
 allCombinations(n_profiles, [genius_dir profiles_dir], profile_name)
@@ -177,7 +177,7 @@ profile_name = 'PEnergy_util';
 profile_nums = [1 2 3];
 [umax, umin, bid_space] = analyzeDomain([genius_dir profiles_dir], profile_name, profile_nums)
 
-%% Smartgrid of parsCat (bid space: 290625)
+%% Smartgrid of parsCat (bid space: 390625)
 
 profiles_dir = 'etc/templates/ANAC2016/parsCat';
 profile_name = 'profile';

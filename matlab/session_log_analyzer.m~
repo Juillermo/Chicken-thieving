@@ -1,6 +1,6 @@
-% *********************************
+% ******************************
 % ** FOR READING SESSION LOGS **
-% *********************************
+% ******************************
 
 clear
 
@@ -8,7 +8,7 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'log'];
-log_name = 'Log-Session_20171203-184052';
+log_name = 'Log-Session_20171204-140833';
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
@@ -99,7 +99,25 @@ for l= 1:n_rounds
     bids_raw1(l,:) = bids_raw{l}{1};
 end
 
-actions = bids_raw1(:,1);
+tot_actions = bids_raw1(:,1);
+actions = {tot_actions(1:3:end,:), tot_actions(2:3:end,:), tot_actions(3:3:end,:)};
+
+acceptances = cell(3, 1);
+offer_indexes = cell(3, 1);
+tot_acceptances = zeros(3, 1);
+for i = 1:3
+    acceptances{i} = zeros( size(actions{i}, 1), 1 );
+    offers{i} = ones( size(actions{i}, 1), 1 );
+    for l = 1:size(actions{i}, 1)
+        if strcmp( actions{i}(l), 'Accept' )
+            acceptances{i}(l) = 1;
+            offer_indexes{i}(l) = 0;
+        end
+    end
+    tot_acceptances(i) = sum(acceptances{i})
+    offer_indexes{i} = find( acceptances{i} == 0 );
+end
+
 values = bids_raw1(:, 2:end);
 
 for l = 1:n_rounds
@@ -133,20 +151,28 @@ ylabel(['Second agent: ' agent_names{2}]),
 zlabel(['Third agent: ' agent_names{3}]),
 legend('bids', 'minimum_utility', 'nash point', 'max_triangle', agent_names{:}, 'Negotiation point')
 
+% With acceptances
+% figure(4), clf,
+% plot(agent_times_agg{1}, utilities3{1}(:,1), 'm'), hold on,
+% plot(agent_times_agg{2}, utilities3{2}(:,2), 'g'), grid on,
+% plot(agent_times_agg{3}, utilities3{3}(:,3), 'b'),
+% title('Concession curves'), legend(agent_names{:}, 'Location', 'southwest'),
+
+% Without acceptances
 figure(4), clf,
-plot(agent_times_agg{1}, utilities3{1}(:,1), 'm'), hold on,
-plot(agent_times_agg{2}, utilities3{2}(:,2), 'g'), grid on,
-plot(agent_times_agg{3}, utilities3{3}(:,3), 'b'),
-title('Concession curves'), legend(agent_names{:}, 'Location', 'southwest'),
+plot(agent_times_agg{1}(offer_indexes{1}), utilities3{1}(offer_indexes{1},1), 'm'), hold on,
+plot(agent_times_agg{2}(offer_indexes{2}), utilities3{2}(offer_indexes{2},2), 'g'), grid on,
+plot(agent_times_agg{3}(offer_indexes{3}), utilities3{3}(offer_indexes{3},3), 'b'),
+title('Concession curves (without acceptances)'), legend(agent_names{:}, 'Location', 'southwest'),
 
-figure(5), clf,
-plot(agent_times_agg{1}, utilities3{1}(:,1), 'm'), hold on,
-plot(agent_times_agg{1}, utilities3{1}(:,2), 'g'), grid on,
-plot(agent_times_agg{1}, utilities3{2}(:,3), 'b'),
-title('Utilities of agent 2 bids'), legend(agent_names{:}, 'Location', 'southwest'),
-
-figure(6), clf,
-plot(agent_times_agg{2}, utilities3{2}(:,1), 'm'), hold on,
-plot(agent_times_agg{2}, utilities3{2}(:,2), 'g'), grid on,
-plot(agent_times_agg{2}, utilities3{2}(:,3), 'b'),
-title('Utilities of agent 2 bids'), legend(agent_names{:}, 'Location', 'southwest'),
+figure(6), clf
+for i = 1:3
+    figure(4+i), clf,
+    plot(agent_times_agg{i}(offer_indexes{i}), utilities3{i}(:,1), 'm'), hold on,
+    plot(agent_times_agg{i}, utilities3{i}(:,2), 'g'), grid on,
+    plot(agent_times_agg{i}, utilities3{i}(:,3), 'b'),
+    title(['Utilities of bids from agent ' agent_names{i}]), legend(agent_names{:}, 'Location', 'southwest'),
+    
+    figure(8),
+    subplot(1,3,i), histogram( find(acceptances{i}) / size(acceptances{i},1) ),
+end
