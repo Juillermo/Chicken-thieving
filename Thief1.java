@@ -1,228 +1,280 @@
 
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
-import negotiator.Agent;
+import java.util.ArrayList;
+
+import negotiator.AgentID;
 import negotiator.Bid;
-import negotiator.actions.Accept;
+
 import negotiator.actions.Action;
-import negotiator.actions.EndNegotiation;
 import negotiator.actions.Offer;
-import negotiator.issue.Issue;
-import negotiator.issue.IssueDiscrete;
-import negotiator.issue.IssueInteger;
-import negotiator.issue.IssueReal;
-import negotiator.issue.Value;
-import negotiator.issue.ValueInteger;
-import negotiator.issue.ValueReal;
-import negotiator.timeline.Timeline;
+import negotiator.parties.AbstractNegotiationParty;
+import negotiator.parties.NegotiationInfo;
 
+import negotiator.boaframework.OpponentModel;
 
-public class Thief1 extends Agent {
-	
-	private
-	Action actionOfPartner;
-	Bid lastPartnerBid;
-    ModelTime Model;
+import negotiator.actions.Accept;
 
-    
-	private static double MINIMUM_BID_UTILITY = 0.0;
+public class Thief1 extends AbstractNegotiationParty {
 
-	
+	private final String description = "Observer Agent";
+	Bid lastReceivedOffer; // offer on the table
+	Bid myLastOffer;
+	ModelTime t;
+	int rounds;
+	int numModels;
+	AgentID[] agents;
+	ModelScore[] ms;
+	OpponentModel[][] models;
+	OMrepo omr;
+	Bid backup;
+	boolean nashflag;
+	List<NashBidDetails> nashbids;
+
+	BiddingStrategy s1, s2, s3;
+	ModelDomain modelDomain;
+	Bid onTable;
+	int afterUs;
+	boolean chooseActionFlag;
+	boolean setOrderFlag;
+
+	int finalRounds;
+	int nBackups;
+	int nBackupsOffered;
+
 	/**
 	 * init is called when a nxt session starts with the same opponent.
 	 */
 	@Override
-	public void init() {
-		MINIMUM_BID_UTILITY = utilitySpace.getReservationValueUndiscounted();
-		actionOfPartner = null;
-		lastPartnerBid= null;
-		Model=new ModelTime();
-		
+	public void init(NegotiationInfo info) {
+		super.init(info);
+
+		modelDomain = new ModelDomain(info.getUtilitySpace());
+		numModels = getNumModels();
+		omr = new OMrepo(info);
+		models = new OpponentModel[2][];
+		models[0] = omr.getModels(numModels);
+		models[1] = omr.getModels(numModels);
+
+		ms = new ModelScore[2];
+		ms[0] = new ModelScore(info, models[0]);
+		ms[1] = new ModelScore(info, models[1]);
+
+		t = new ModelTime();
+
+		agents = new AgentID[2];
+		agents[0] = null;
+		agents[1] = null;
+
+		nashbids = new ArrayList<NashBidDetails>();
+		s1 = new Strategy1();
+		s1.init(info, ms, agents);
+		s2 = new Strategy2();
+		s2.init(info, ms, agents, nashbids);
+		s3 = new Strategy3();
+		s3.init(info, ms, agents, nashbids);
+
+		onTable = null;
+		chooseActionFlag = false;
+		afterUs = -1;
+		setOrderFlag = false;
+		rounds = 0;
+		backup = null;
+		finalRounds = 0;
+		nBackups = 0;
+		nBackupsOffered = 0;
+		nashflag = false;
+
 	}
 
 	@Override
-	public String getVersion() {
-		return "1.1";
+	public String getDescription() {
+		return description;
+	}
+
+	public int getAgentId(AgentID a) {
+		int agentid = -1;
+		if (agents[0] == null) {
+			agentid = 0;
+			agents[0] = a;
+		} else if (agents[1] == null) {
+			agentid = 1;
+			agents[1] = a;
+		} else
+			agentid = (agents[0].equals(a)) ? 0 : 1;
+		return agentid;
+
 	}
 
 	@Override
-	public String getName() {
-		return "Chicken thief";
-	}
-	
-	
-
-	@Override
-	public void ReceiveMessage(Action opponentAction) {
-		
-		
-		actionOfPartner = opponentAction;
-		if (actionOfPartner instanceof Offer) {
-			lastPartnerBid = ((Offer) actionOfPartner).getBid();
-			
-			
+	public void receiveMessage(AgentID sender, Action act) {
+		super.receiveMessage(sender, act);
+		int ag = getAgentId(sender);
+		if (chooseActionFlag && !setOrderFlag) {
+			setOrderFlag = true;
+			afterUs = ag;
 		}
-	
-	}
+		if (act instanceof Offer) { // sender is making an offer
+			Offer offer = (Offer) act;
+			ms[ag].updateModels(offer, timeline, onTable);
+
+			lastReceivedOffer = offer.getBid();
+			onTable = lastReceivedOffer;
+
+		} else if (setOrderFlag && ag != afterUs && act instanceof Accept) {
+			if (backup == null || (getUtility(backup) < getUtility(onTable))) {
+
+				backup = onTable;
+				System.out.println("Don: New backup bid is"
+						+ getUtility(backup) + "at round " + rounds);
+				nBackups++;
+
+			}
+
+		}
+
+	};
 
 	@Override
-	public Action chooseAction() {
-		
+	public Action chooseAction(List<Class<? extends Action>> classes) {
+		chooseActionFlag = true;
+		rounds++;
+
+		double time = getTimeLine().getTime();
+		t.model(time);
 		Action action = null;
+		int rem = t.getRemRounds(time);
 
-		try {
-			
-			double time=timeline.getTime();
-			Model.model(time);
-			if (actionOfPartner == null)
-				action = chooseRandomBidAction();
-			else if (actionOfPartner instanceof Offer) {
-				double offeredUtilFromOpponent = getUtility(lastPartnerBid);
-				// get current time
-				
-				action = chooseRandomBidAction();
+		Bid bidToOffer = null;
+		System.out.println("Don: Remaining rounds: " + rem);
+		int phase = getPhase(time, rem);
+		switch (phase) {
+		case 5: {
+			System.out.println("Don: Last round!? Time: " + time
+					+ ", max time per round: " + t.maxtime);
+			finalRounds++;
+			action = new Accept(this.getPartyId(), lastReceivedOffer);
+			return action;
 
-				Bid myBid = ((Offer) action).getBid();
-				double myOfferedUtil = getUtility(myBid);
-
-				// accept under certain circumstances
-				if (isAcceptable(offeredUtilFromOpponent, myOfferedUtil, time))
-					{System.out.println(lastPartnerBid.toString());
-					action = new Accept(getAgentID(), lastPartnerBid);
-					}
-
-			}
-			else if (actionOfPartner instanceof Offer) {
-				double offeredUtilFromOpponent = getUtility(lastPartnerBid);
-				// get current time
-				action = chooseRandomBidAction();
-
-				Bid myBid = ((Offer) action).getBid();
-				double myOfferedUtil = getUtility(myBid);
-
-				// accept under certain circumstances
-				if (isAcceptable(offeredUtilFromOpponent, myOfferedUtil, time))
-					{System.out.println(lastPartnerBid.toString());
-					action = new Accept(getAgentID(), lastPartnerBid);
-					}
-
-			}
-			else  {
-				double offeredUtilFromOpponent = getUtility(lastPartnerBid);
-				// get current time
-				
-				action = chooseRandomBidAction();
-
-				Bid myBid = ((Offer) action).getBid();
-				double myOfferedUtil = getUtility(myBid);
-
-				// accept under certain circumstances
-				if (isAcceptable(offeredUtilFromOpponent, myOfferedUtil, time))
-					{System.out.println(lastPartnerBid.toString());
-					action = new Accept(getAgentID(), lastPartnerBid);
-					}
-
-			}
-			}
-			
-		catch (Exception e) {
-			System.out.println("Exception in ChooseAction:" + e.getMessage());
-			if (lastPartnerBid != null) {
-				action = new Accept(getAgentID(), lastPartnerBid);
-				
-				
-			} else {
-				action = new EndNegotiation(getAgentID());
-			}
 		}
-		
-		
+
+		case 4: {
+			System.out.println("Don: Offering backup, since only " + rem
+					+ " rounds left");
+			bidToOffer = backup;
+			nBackupsOffered++;
+
+		}
+			break;
+
+		case 3: {
+
+			if (modelDomain.getSize() <= 5000) {
+				nashflag = false;
+				s3.computeNash();
+				s3.sortBids(nashbids, NashBidDetails.nashComparator);
+				nashflag = true;
+			}
+
+			bidToOffer = s3.getBid(rem);
+			System.out.println("Don: In phase 3");
+
+		}
+			break;
+
+		case 2: {
+			if (!nashflag) {
+				s2.computeNash();
+				s2.sortBids(nashbids, NashBidDetails.nashComparator);
+				nashflag = true;
+			}
+			bidToOffer = s2.getBid(time);
+		}
+			break;
+
+		case 1: {
+			bidToOffer = s1.getBid(time);
+		}
+			break;
+		}
+
+		if (bidToOffer != null) {
+			action = new Offer(this.getPartyId(), bidToOffer);
+		} else {
+			System.out.println("Don: bidToOffer is null");
+			bidToOffer = s1.getMaxUtilityBid();
+			action = new Offer(this.getPartyId(), bidToOffer);
+		}
+
+		if (getUtility(bidToOffer) <= getUtility(lastReceivedOffer)) {
+
+			if (backup != null
+					&& getUtility(lastReceivedOffer) <= getUtility(backup)) {
+				action = new Offer(this.getPartyId(), backup);
+				nBackupsOffered++;
+			} else
+				action = new Accept(this.getPartyId(), lastReceivedOffer);
+		}
+
+		if (action instanceof Offer)
+			onTable = ((Offer) action).getBid();
+
+		myLastOffer = bidToOffer;
 		return action;
 	}
 
-	private boolean isAcceptable(double offeredUtilFromOpponent, double myOfferedUtil, double time) throws Exception 
-	{
-		if(Model.getRemRounds(time)<=1)
-			{
-			System.out.println("last round!");
-			return true;
-			}
-		return false;
+	@Override
+	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(
+			Bid acceptedBid) {
+
+		Bid nashBid = s3.getNashBids(1).get(0).getBid();
+
+		System.out.println("Don: Our utility for Nash is "
+				+ getUtility(nashBid));
+		ms[0].printState(nashBid);
+		ms[1].printState(nashBid);
+
+		System.out.println("Don: There were " + finalRounds + " final rounds.");
+		System.out.println("Don: There were " + nBackups
+				+ " backups that have been offered " + nBackups + " times.");
+
+		return null;
 	}
 
-	/**
-	 * Wrapper for getRandomBid, for convenience.
-	 * 
-	 * @return new Action(Bid(..)), with bid utility > MINIMUM_BID_UTIL. If a
-	 *         problem occurs, it returns an Accept() action.
-	 */
-	private Action chooseRandomBidAction() {
-		Bid nextBid = null;
-		try {
-			nextBid = getRandomBid();
-		} catch (Exception e) {
-			System.out.println("Problem with received bid:" + e.getMessage() + ". cancelling bidding");
-		}
-		if (nextBid == null)
-			return (new Accept(getAgentID(), lastPartnerBid));
-		return (new Offer(getAgentID(), nextBid));
+	public int getNumModels() {
+		int n;
+
+		if (modelDomain.getSize() > 20000)
+			n = 1;
+		else if (modelDomain.getSize() > 10000)
+			n = 2;
+		else if (modelDomain.getSize() > 5000)
+			n = 3;
+		else if (modelDomain.getSize() > 1000)
+			n = 4;
+		else
+			n = 5;
+		return n;
 	}
 
-	/**
-	 * @return a random bid with high enough utility value.
-	 * @throws Exception
-	 *             if we can't compute the utility (eg no evaluators have been
-	 *             set) or when other evaluators than a DiscreteEvaluator are
-	 *             present in the util space.
-	 */
-	private Bid getRandomBid() throws Exception {
-		HashMap<Integer, Value> values = new HashMap<Integer, Value>(); // pairs
-																		// <issuenumber,chosen
-																		// value
-																		// string>
-		List<Issue> issues = utilitySpace.getDomain().getIssues();
-		Random randomnr = new Random();
+	public int getPhase(double time, int rem) {
+		int phase = 0;
+		double phase3at = 0.95;
+		double phase4at = 0.99;
+		double phase2at = 0.5;
+		if (rem <= 1 && time > phase3at)
+			phase = 5;
+		else if ((time > phase4at || rem < 5) && backup != null)
+			phase = 4;
+		else if ((time > phase3at || rem < modelDomain.getSize()) && nashflag)
+			phase = 3;
+		else if (time > phase2at && ms[0].confident(100, 5)
+				&& ms[1].confident(100, 5))
+			phase = 2;
+		else
+			phase = 1;
 
-		// create a random bid with utility>MINIMUM_BID_UTIL.
-		// note that this may never succeed if you set MINIMUM too high!!!
-		// in that case we will search for a bid till the time is up (3 minutes)
-		// but this is just a simple agent.
-		Bid bid = null;
-		do {
-			for (Issue lIssue : issues) {
-				switch (lIssue.getType()) {
-				case DISCRETE:
-					IssueDiscrete lIssueDiscrete = (IssueDiscrete) lIssue;
-					int optionIndex = randomnr.nextInt(lIssueDiscrete.getNumberOfValues());
-					values.put(lIssue.getNumber(), lIssueDiscrete.getValue(optionIndex));
-					break;
-				case REAL:
-					IssueReal lIssueReal = (IssueReal) lIssue;
-					int optionInd = randomnr.nextInt(lIssueReal.getNumberOfDiscretizationSteps() - 1);
-					values.put(lIssueReal.getNumber(),
-							new ValueReal(lIssueReal.getLowerBound()
-									+ (lIssueReal.getUpperBound() - lIssueReal.getLowerBound()) * (double) (optionInd)
-											/ (double) (lIssueReal.getNumberOfDiscretizationSteps())));
-					break;
-				case INTEGER:
-					IssueInteger lIssueInteger = (IssueInteger) lIssue;
-					int optionIndex2 = lIssueInteger.getLowerBound()
-							+ randomnr.nextInt(lIssueInteger.getUpperBound() - lIssueInteger.getLowerBound());
-					values.put(lIssueInteger.getNumber(), new ValueInteger(optionIndex2));
-					break;
-				default:
-					throw new Exception("issue type " + lIssue.getType() + " not supported by SimpleAgent2");
-				}
-			}
-			bid = new Bid(utilitySpace.getDomain(), values);
-		} while (getUtility(bid) < MINIMUM_BID_UTILITY);
+		return phase;
 
-		return bid;
-	}}
+	}
 
-	
-	
-	 
-		
+}
