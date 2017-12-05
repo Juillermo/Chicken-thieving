@@ -44,7 +44,7 @@ public class OMrepo {
 	}
 
 	public OpponentModel[] getModels() {
-		OpponentModel[] models = { new AgentXFrequencyModel(), new CUHKFrequencyModelV2(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
+		OpponentModel[] models = { new WindowedOpponentModel(), new AgentXFrequencyModel(), new CUHKFrequencyModelV2(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
 				new AgentLGModel(), new NashFrequencyModel(), };
 
 		for (int i = 0; i < models.length; i++) {
@@ -57,7 +57,7 @@ public class OMrepo {
 			} else if (models[i] instanceof WindowedOpponentModel) {
 				p.put("w", 100.0);
 			}
-			models[i].init(ns, null);
+			models[i].init(ns, p);
 		}
 
 		return models;
