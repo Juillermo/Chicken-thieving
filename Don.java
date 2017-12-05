@@ -1,4 +1,3 @@
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -49,42 +48,47 @@ public class Don extends AbstractNegotiationParty {
 	public void init(NegotiationInfo info) {
 		super.init(info);
 
-		modelDomain = new ModelDomain(info.getUtilitySpace());
-		numModels = getNumModels();
-		omr = new OMrepo(info);
-		models = new OpponentModel[2][];
-		models[0] = omr.getModels(numModels);
-		models[1] = omr.getModels(numModels);
+		try {
+			modelDomain = new ModelDomain(info.getUtilitySpace());
 
-		ms = new ModelScore[2];
-		ms[0] = new ModelScore(info, models[0]);
-		ms[1] = new ModelScore(info, models[1]);
+			numModels = getNumModels();
+			omr = new OMrepo(info);
+			models = new OpponentModel[2][];
+			models[0] = omr.getModels(numModels);
+			models[1] = omr.getModels(numModels);
 
-		t = new ModelTime();
+			ms = new ModelScore[2];
+			ms[0] = new ModelScore(info, models[0]);
+			ms[1] = new ModelScore(info, models[1]);
 
-		agents = new AgentID[2];
-		agents[0] = null;
-		agents[1] = null;
+			t = new ModelTime();
 
-		nashbids = new ArrayList<NashBidDetails>();
-		s1 = new Strategy1();
-		s1.init(info, ms, agents);
-		s2 = new Strategy2();
-		s2.init(info, ms, agents, nashbids);
-		s3 = new Strategy3();
-		s3.init(info, ms, agents, nashbids);
+			agents = new AgentID[2];
+			agents[0] = null;
+			agents[1] = null;
 
-		onTable = null;
-		chooseActionFlag = false;
-		afterUs = -1;
-		setOrderFlag = false;
-		rounds = 0;
-		backup = null;
-		finalRounds = 0;
-		nBackups = 0;
-		nBackupsOffered = 0;
-		nashflag = false;
-		phase3flag=false;
+			nashbids = new ArrayList<NashBidDetails>();
+			s1 = new Strategy1();
+			s1.init(info, ms, agents);
+			s2 = new Strategy2();
+			s2.init(info, ms, agents, nashbids);
+			s3 = new Strategy3();
+			s3.init(info, ms, agents, nashbids);
+
+			onTable = null;
+			chooseActionFlag = false;
+			afterUs = -1;
+			setOrderFlag = false;
+			rounds = 0;
+			backup = null;
+			finalRounds = 0;
+			nBackups = 0;
+			nBackupsOffered = 0;
+			nashflag = false;
+			phase3flag = false;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -110,156 +114,172 @@ public class Don extends AbstractNegotiationParty {
 	@Override
 	public void receiveMessage(AgentID sender, Action act) {
 		super.receiveMessage(sender, act);
-		int ag = getAgentId(sender);
-		if (chooseActionFlag && !setOrderFlag) {
-			setOrderFlag = true;
-			afterUs = ag;
-		}
-		if (act instanceof Offer) { // sender is making an offer
-			Offer offer = (Offer) act;
-			try {
+		try {
+			int ag = getAgentId(sender);
+
+			if (chooseActionFlag && !setOrderFlag) {
+				setOrderFlag = true;
+				afterUs = ag;
+			}
+			if (act instanceof Offer) { // sender is making an offer
+				Offer offer = (Offer) act;
 				ms[ag].updateModels(offer, timeline, onTable);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+				lastReceivedOffer = offer.getBid();
+				onTable = lastReceivedOffer;
+
+			} else if (setOrderFlag && ag != afterUs && act instanceof Accept) {
+				if (backup == null
+						|| (getUtility(backup) < getUtility(onTable))) {
+
+					backup = onTable;
+					System.out.println("Don: New backup bid is"
+							+ getUtility(backup) + "at round " + rounds);
+					nBackups++;
+
+				}
+
 			}
-
-			lastReceivedOffer = offer.getBid();
-			onTable = lastReceivedOffer;
-
-		} else if (setOrderFlag && ag != afterUs && act instanceof Accept) {
-			if (backup == null || (getUtility(backup) < getUtility(onTable))) {
-
-				backup = onTable;
-				System.out.println("Don: New backup bid is"
-						+ getUtility(backup) + "at round " + rounds);
-				nBackups++;
-
-			}
-
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	};
 
 	@Override
 	public Action chooseAction(List<Class<? extends Action>> classes) {
-		chooseActionFlag = true;
-		rounds++;
-
-		double time = getTimeLine().getTime();
-		t.model(time);
 		Action action = null;
-		int rem = t.getRemRounds(time);
+		try {
+			chooseActionFlag = true;
 
-		Bid bidToOffer = null;
-		System.out.println("Don: Remaining rounds: " + rem);
-		int phase = getPhase(time, rem);
-		switch (phase) {
-		case 5: {
-			System.out.println("Don: Last round!? Time: " + time
-					+ ", max time per round: " + t.maxtime);
-			finalRounds++;
-			action = new Accept(this.getPartyId(), lastReceivedOffer);
-			return action;
+			rounds++;
 
-		}
+			double time = getTimeLine().getTime();
+			t.model(time);
 
-		case 4: {
-			System.out.println("Don: Offering backup, since only " + rem
-					+ " rounds left");
-			bidToOffer = backup;
-			nBackupsOffered++;
+			int rem = t.getRemRounds(time);
 
-		}
-			break;
-
-		case 3: {
-            
-			if (modelDomain.getSize() <= 100) {
-				if(!phase3flag)
-				{s3.computeNash();
-				s3.sortBids(nashbids, NashBidDetails.nashComparator);
-				phase3flag=true;}
-			}
-
-			bidToOffer = s3.getBid(rem);
-			System.out.println("Don: In phase 3");
-
-		}
-			break;
-
-		case 2: {
-			if (!nashflag) {
-				s2.computeNash();
-				s2.sortBids(nashbids, NashBidDetails.nashComparator);
-				nashflag = true;
-			}
-			bidToOffer = s2.getBid(time);
-		}
-			break;
-
-		case 1: {
-			bidToOffer = s1.getBid(time);
-		}
-			break;
-		}
-
-		if (bidToOffer != null) {
-			action = new Offer(this.getPartyId(), bidToOffer);
-		} else {
-			System.out.println("Don: bidToOffer is null");
-			bidToOffer = s1.getMaxUtilityBid();
-			action = new Offer(this.getPartyId(), bidToOffer);
-		}
-
-		if (getUtility(bidToOffer) <= getUtility(lastReceivedOffer)) {
-
-			if (backup != null
-					&& getUtility(lastReceivedOffer) <= getUtility(backup)) {
-				action = new Offer(this.getPartyId(), backup);
-				nBackupsOffered++;
-			} else
+			Bid bidToOffer = null;
+			System.out.println("Don: Remaining rounds: " + rem);
+			int phase = getPhase(time, rem);
+			switch (phase) {
+			case 5: {
+				System.out.println("Don: Last round!? Time: " + time
+						+ ", max time per round: " + t.maxtime);
+				finalRounds++;
 				action = new Accept(this.getPartyId(), lastReceivedOffer);
+				return action;
+
+			}
+
+			case 4: {
+				System.out.println("Don: Offering backup, since only " + rem
+						+ " rounds left");
+				bidToOffer = backup;
+				nBackupsOffered++;
+
+			}
+				break;
+
+			case 3: {
+
+				if (modelDomain.getSize() <= 100) {
+					if (!phase3flag) {
+						s3.computeNash();
+						s3.sortBids(nashbids, NashBidDetails.nashComparator);
+						phase3flag = true;
+					}
+				}
+
+				bidToOffer = s3.getBid(rem);
+				System.out.println("Don: In phase 3");
+
+			}
+				break;
+
+			case 2: {
+				if (!nashflag) {
+					s2.computeNash();
+					s2.sortBids(nashbids, NashBidDetails.nashComparator);
+					nashflag = true;
+				}
+				bidToOffer = s2.getBid(time);
+			}
+				break;
+
+			case 1: {
+				bidToOffer = s1.getBid(time);
+			}
+				break;
+			}
+
+			if (bidToOffer != null) {
+				action = new Offer(this.getPartyId(), bidToOffer);
+			} else {
+				System.out.println("Don: bidToOffer is null");
+				bidToOffer = s1.getMaxUtilityBid();
+				action = new Offer(this.getPartyId(), bidToOffer);
+			}
+
+			if (getUtility(bidToOffer) <= getUtility(lastReceivedOffer)) {
+
+				if (backup != null
+						&& getUtility(lastReceivedOffer) <= getUtility(backup)) {
+					action = new Offer(this.getPartyId(), backup);
+					nBackupsOffered++;
+				} else
+					action = new Accept(this.getPartyId(), lastReceivedOffer);
+			}
+
+			if (action instanceof Offer)
+				{onTable = ((Offer) action).getBid();
+				 myLastOffer = bidToOffer;}
+			return action;
+		} catch (Exception e) {
+			System.out.println("in Catch1");
+			e.printStackTrace();
+			try {
+				action = new Offer(this.getPartyId(),
+						utilitySpace.getMaxUtilityBid());
+				return action;
+			} catch (Exception e1) {
+				System.out.println("in Catch2");
+				try {
+					action = new Accept(this.getPartyId(), lastReceivedOffer);
+					return action;
+				} catch (Exception e2) {
+					System.out.println("in Catch3");
+					action = new Offer(this.getPartyId(), generateRandomBid());
+					return action;
+				}
+			}
 		}
-
-		if (action instanceof Offer)
-			onTable = ((Offer) action).getBid();
-
-		myLastOffer = bidToOffer;
-		return action;
+		
 	}
 
 	@Override
-	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(Bid acceptedBid) {
-		try {
-			Bid nashBid = s3.getNashBids(1).get(0).getBid();
-			
-			System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
-			ms[0].printState(nashBid);
-			ms[1].printState(nashBid);
+	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(
+			Bid acceptedBid) {
 
-			System.out.println("Don: There were " + finalRounds + " final rounds.");
-			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
-			
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			Bid maxBid;
-			try {
-				maxBid = this.utilitySpace.getMaxUtilityBid();
-				ms[0].printState(maxBid);
-				ms[1].printState(maxBid);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+		if (!nashflag || nashbids.size() == 0) {
+			System.out.println("Don: Calculating nash");
+			s3.computeNash();
+			s3.sortBids(nashbids, NashBidDetails.nashComparator);
+		}
 
-			System.out.println("Don: There were " + finalRounds + " final rounds.");
-			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
-		};
+		Bid nashBid = s3.getNashBids(1).get(0).getBid();
+
+		System.out.println("Don: Our utility for Nash is "
+				+ getUtility(nashBid));
+		ms[0].printState(nashBid);
+		ms[1].printState(nashBid);
+
+		System.out.println("Don: There were " + finalRounds + " final rounds.");
+		System.out.println("Don: There were " + nBackups
+				+ " backups that have been offered " + nBackups + " times.");
 
 		return null;
 	}
-
 
 	public int getNumModels() {
 		int n;
@@ -282,7 +302,7 @@ public class Don extends AbstractNegotiationParty {
 		double phase3at = 0.95;
 		double phase4at = 0.99;
 		double phase2at = 0.5;
-		
+
 		if (rem <= 1 && time > phase3at)
 			phase = 5;
 		else if ((time > phase4at || rem < 5) && backup != null)
