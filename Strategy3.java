@@ -45,7 +45,7 @@ public class Strategy3 extends BiddingStrategy {
 			int index = (int) Math.floor((count - 1) / repeat);
 			return bids.get(index).getBid();
 		}else {
-			return utilitySpace.getMaxUtilityBid();
+			return getMaxUtilityBid();
 		}
 	}
 
