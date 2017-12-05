@@ -38,7 +38,7 @@ public class Strategy3 extends BiddingStrategy {
 		}
 
 		count++;
-		if (phase3bids.size() != 0) {
+		if (bids.size() != 0) {
 			if (count > bids.size())
 				count = 1;
 			int repeat = (int) Math.floor(rem / bids.size());
