@@ -261,22 +261,38 @@ public class Don extends AbstractNegotiationParty {
 	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(
 			Bid acceptedBid) {
 
-		if (!nashflag || nashbids.size() == 0) {
+		try{
+			if (!nashflag || nashbids.size() == 0) {
 			System.out.println("Don: Calculating nash");
 			s3.computeNash();
 			s3.sortBids(nashbids, NashBidDetails.nashComparator);
-		}
+			}	
 
-		Bid nashBid = s3.getNashBids(1).get(0).getBid();
+			Bid nashBid = s3.getNashBids(1).get(0).getBid();
 
-		System.out.println("Don: Our utility for Nash is "
+			System.out.println("Don: Our utility for Nash is "
 				+ getUtility(nashBid));
-		ms[0].printState(nashBid);
-		ms[1].printState(nashBid);
+			ms[0].printState(nashBid);
+			ms[1].printState(nashBid);
 
-		System.out.println("Don: There were " + finalRounds + " final rounds.");
-		System.out.println("Don: There were " + nBackups
+			System.out.println("Don: There were " + finalRounds + " final rounds.");
+			System.out.println("Don: There were " + nBackups
 				+ " backups that have been offered " + nBackups + " times.");
+			}
+		
+		catch(Exception e){
+			System.out.println(e.getMessage());
+ 			Bid maxBid = s1.getMaxUtilityBid();
+ 			
+ 			ms[0].printState(maxBid);
+ 			ms[1].printState(maxBid);
+  
+ 			System.out.println("Don: There were " + finalRounds + " final rounds.");
+ 			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+ 			System.out.println("Don: There were " + finalRounds + " final rounds.");
+ 			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+ 		};
+			
 
 		return null;
 	}
