@@ -19,7 +19,6 @@ public class Strategy2 extends BiddingStrategy {
 	    lastThresh=1;
 	}
 
-	@Override
 	public Bid getBid(double time) {
 		double thresh = getNashThresh(time, 0.2, 1, 0);
 		misc.Range r = getRange(lastThresh, thresh);

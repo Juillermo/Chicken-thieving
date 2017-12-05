@@ -7,29 +7,32 @@
 
 clear
 
-% Adding paths
+%% *** PARAMETERS TO CHANGE FOR EVERY TOURNAMENT ***
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'logs'];
-log_name = 'four_agents.csv';
-n_agents = 4; % Number of agents in the tournament (without repetition)
+log_name = 'bigNIGHToUT (copy).csv';
+n_agents = 5; % Number of agents in the tournament (without repetition)
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
     'etc/templates/ANAC2015/group2-new_sporthal';
+    'etc/templates/ANAC2015/group2-politics';
     'etc/templates/ANAC2016/AgentLightSmartGrid';
     };
 
+
+% Adding paths
 addpath(log_dir);
 for i = 1:size(profiles_dir, 1)
     addpath([genius_dir profiles_dir{i}]);
 end
 
 %% Reading the log
-table = readtable( log_name );
+table = readtable( log_name, 'HeaderLines', 1 );
 
 tot_sessions = size( table.(1), 1);
-n_sessions = factorial(n_agents);
+n_sessions = 60;
 n_tournaments = tot_sessions / n_sessions;
 
 % Initializing variables
@@ -119,7 +122,7 @@ for i_tour = 1:n_tournaments
     % Display data
     sub_table = table((i_tour-1)*n_sessions+1 : i_tour*n_sessions, :);
     
-    sessions_per_agent = factorial(n_agents)-factorial(n_agents-1)
+    sessions_per_agent = 36;
     n_agreements(:,i_tour)'
     umeans = sum( utilities(:,:,i_tour) )/sessions_per_agent
     nashmeans = sum( nashes(:,:,i_tour) )/sessions_per_agent
@@ -130,10 +133,10 @@ for i_tour = 1:n_tournaments
     plot3([0 1],[0 1],[0 1])
   
     figure(2), clf
-    subplot(n_tournaments,2,2*(i_tour-1)+1), plot(utilities(:,:,i_tour), ':x'), legend(names, 'Location', 'south'),
+    plot(utilities(:,:,i_tour), ':x'), legend(names, 'Location', 'south'),
     title('Utilities through different negotiation sessions'), ylim([0 1])
-
-    subplot(n_tournaments,2,2*(i_tour-1)+2)
+    
+    figure(3), clf
     plot([u_domain(:,:,1,i_tour); u_domain(:,:,2,i_tour); u_domain(:,:,3,i_tour)], ':x')
     legend(names, 'Location', 'south'), grid on,
     set(gca, 'Xtick', 0.5:n_sessions/factorial(n_agents-1):n_sessions)

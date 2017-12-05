@@ -25,7 +25,10 @@ public class Strategy3 extends BiddingStrategy {
 		if (count == 0) {
 			int i = 0;
 			bids = new ArrayList<NashBidDetails>();
-
+			if (nashbids == null)
+				System.out.println("Don: Nashbids is NULL!!!!");
+			else
+				System.out.println("Don: Nashbids size is "+nashbids.size());
 			while (i < (Math.ceil(domainSize / 8))) {
 				if (backup != null && utilitySpace.getUtility(nashbids.get(i).getBid()) > utilitySpace.getUtility(backup))
 					bids.add(nashbids.get(i));
@@ -36,16 +39,17 @@ public class Strategy3 extends BiddingStrategy {
 			}
 			sortBids(bids, NashBidDetails.utComparator);
 		}
-
+		System.out.println("Don: Count : "+count);
 		count++;
-		if (phase3bids.size() != 0) {
+		System.out.println("Don: Count : "+count);
+		if (bids.size() != 0) {
 			if (count > bids.size())
 				count = 1;
 			int repeat = (int) Math.floor(rem / bids.size());
 			int index = (int) Math.floor((count - 1) / repeat);
 			return bids.get(index).getBid();
 		}else {
-			return utilitySpace.getMaxUtilityBid();
+			return getMaxUtilityBid();
 		}
 	}
 

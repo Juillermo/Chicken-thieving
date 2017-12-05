@@ -31,17 +31,13 @@ public class BiddingStrategy {
 
 	}
 
-	public void init(NegotiationInfo info, ModelScore[] ms, AgentID[] agents) {
+	public void init1(NegotiationInfo info, ModelScore[] ms, AgentID[] agents) {
 		this.agents = agents;
 		utilitySpace = info.getUtilitySpace();
 		sos = new SortedOutcomeSpace(utilitySpace);
 		this.ms = ms;
 		this.nashbids = null;
 
-	}
-
-	public Bid getBid(double time) {
-		return getMaxUtilityBid();
 	}
 
 	public double getThresh(double time, double e, double Pmax, double Pmin) {
@@ -116,7 +112,6 @@ public class BiddingStrategy {
 
 	public void computeNash() {
 		BidIterator bidIterator = new BidIterator(utilitySpace.getDomain());
-		nashbids = new ArrayList<NashBidDetails>();
 		Bid bid;
 		NashBidDetails nbid;
 		while (bidIterator.hasNext()) {

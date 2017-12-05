@@ -15,11 +15,10 @@ public class Strategy1 extends BiddingStrategy {
  
 	
 	public void init(NegotiationInfo info, ModelScore[] ms, AgentID[] agents) {
-		super.init(info, ms, agents);
+		super.init1(info, ms, agents);
 	    lastThresh=1;
 	}
 
-	@Override
 	public Bid getBid(double time) {
 		double thresh = getThresh(time, 0.2, 1, 0.8);
 

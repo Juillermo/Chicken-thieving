@@ -1,4 +1,5 @@
 import negotiator.Bid;
+import negotiator.boaframework.NegotiationSession;
 import negotiator.boaframework.OpponentModel;
 import negotiator.boaframework.opponentmodel.nash.*;
 import negotiator.issue.*;
@@ -27,19 +28,18 @@ public class WindowedFrequencyModelTryout extends OpponentModel {
     AdditiveUtilitySpace additiveUtilitySpace;
 
 
-    public void init(int windwSize, UtilitySpace space)//, List<Issue> issues)
+    public void init(NegotiationSession ns, Map<String,Double> p)//, List<Issue> issues)
     {
-        issueList = space.getDomain().getIssues();
+    	issueList = ns.getDomain().getIssues();
 
-        window = new ArrayList<Bid>();
         window = new ArrayList<Bid>();
         previousWeights = new LinkedList<List<Double>>();
         currentWeights = new LinkedList<List<Double>>();
-        this.windowSize = windwSize;
+        this.windowSize = p.get("w").intValue();
 
         //issueList.get(j).toString() + currentBidToBeLookedAt.getValue(issueList.get(j).getNumber());
 
-        additiveUtilitySpace = (AdditiveUtilitySpace) space;
+        additiveUtilitySpace = (AdditiveUtilitySpace) ns.getUtilitySpace();
 
         // ((AdditiveUtilitySpace) space).setWeight()
 

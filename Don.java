@@ -30,7 +30,9 @@ public class Don extends AbstractNegotiationParty {
 	boolean nashflag;
 	List<NashBidDetails> nashbids;
 
-	BiddingStrategy s1, s2, s3;
+	Strategy1 s1;
+	Strategy2 s2;
+	Strategy3 s3;
 	ModelDomain modelDomain;
 	Bid onTable;
 	int afterUs;
@@ -84,7 +86,7 @@ public class Don extends AbstractNegotiationParty {
 		nBackups = 0;
 		nBackupsOffered = 0;
 		nashflag = false;
-		phase3flag=false;
+		phase3flag = false;
 
 	}
 
@@ -131,8 +133,7 @@ public class Don extends AbstractNegotiationParty {
 			if (backup == null || (getUtility(backup) < getUtility(onTable))) {
 
 				backup = onTable;
-				System.out.println("Don: New backup bid is"
-						+ getUtility(backup) + "at round " + rounds);
+				System.out.println("Don: New backup bid is" + getUtility(backup) + "at round " + rounds);
 				nBackups++;
 
 			}
@@ -156,8 +157,7 @@ public class Don extends AbstractNegotiationParty {
 		int phase = getPhase(time, rem);
 		switch (phase) {
 		case 5: {
-			System.out.println("Don: Last round!? Time: " + time
-					+ ", max time per round: " + t.maxtime);
+			System.out.println("Don: Last round!? Time: " + time + ", max time per round: " + t.maxtime);
 			finalRounds++;
 			action = new Accept(this.getPartyId(), lastReceivedOffer);
 			return action;
@@ -165,8 +165,7 @@ public class Don extends AbstractNegotiationParty {
 		}
 
 		case 4: {
-			System.out.println("Don: Offering backup, since only " + rem
-					+ " rounds left");
+			System.out.println("Don: Offering backup, since only " + rem + " rounds left");
 			bidToOffer = backup;
 			nBackupsOffered++;
 
@@ -174,12 +173,13 @@ public class Don extends AbstractNegotiationParty {
 			break;
 
 		case 3: {
-            
+
 			if (modelDomain.getSize() <= 100) {
-				if(!phase3flag)
-				{s3.computeNash();
-				s3.sortBids(nashbids, NashBidDetails.nashComparator);
-				phase3flag=true;}
+				if (!phase3flag) {
+					s3.computeNash();
+					s3.sortBids(nashbids, NashBidDetails.nashComparator);
+					phase3flag = true;
+				}
 			}
 
 			bidToOffer = s3.getBid(rem);
@@ -214,8 +214,7 @@ public class Don extends AbstractNegotiationParty {
 
 		if (getUtility(bidToOffer) <= getUtility(lastReceivedOffer)) {
 
-			if (backup != null
-					&& getUtility(lastReceivedOffer) <= getUtility(backup)) {
+			if (backup != null && getUtility(lastReceivedOffer) <= getUtility(backup)) {
 				action = new Offer(this.getPartyId(), backup);
 				nBackupsOffered++;
 			} else
@@ -233,14 +232,15 @@ public class Don extends AbstractNegotiationParty {
 	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(Bid acceptedBid) {
 		try {
 			Bid nashBid = s3.getNashBids(1).get(0).getBid();
-			
+
 			System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
 			ms[0].printState(nashBid);
 			ms[1].printState(nashBid);
 
 			System.out.println("Don: There were " + finalRounds + " final rounds.");
-			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
-			
+			System.out.println(
+					"Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			Bid maxBid;
@@ -254,26 +254,27 @@ public class Don extends AbstractNegotiationParty {
 			}
 
 			System.out.println("Don: There were " + finalRounds + " final rounds.");
-			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
-		};
+			System.out.println(
+					"Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+		}
+		;
 
 		return null;
 	}
-
 
 	public int getNumModels() {
 		int n;
 
 		if (modelDomain.getSize() > 20000)
-			n = 1;
-		else if (modelDomain.getSize() > 10000)
-			n = 2;
-		else if (modelDomain.getSize() > 5000)
 			n = 3;
-		else if (modelDomain.getSize() > 1000)
+		else if (modelDomain.getSize() > 10000)
 			n = 4;
+		else if (modelDomain.getSize() > 5000)
+			n = 6;
+		else if (modelDomain.getSize() > 1000)
+			n = 7;
 		else
-			n = 5;
+			n = 10;
 		return n;
 	}
 
@@ -282,15 +283,14 @@ public class Don extends AbstractNegotiationParty {
 		double phase3at = 0.95;
 		double phase4at = 0.99;
 		double phase2at = 0.5;
-		
+
 		if (rem <= 1 && time > phase3at)
 			phase = 5;
 		else if ((time > phase4at || rem < 5) && backup != null)
 			phase = 4;
-		else if ((time > phase3at || rem < modelDomain.getSize()) && nashflag)
+		else if ((time > phase3at || rem < modelDomain.getSize()/8) && nashflag)
 			phase = 3;
-		else if (time > phase2at && ms[0].confident(100, 5)
-				&& ms[1].confident(100, 5))
+		else if (time > phase2at && ms[0].confident(100, 5) && ms[1].confident(100, 5))
 			phase = 2;
 		else
 			phase = 1;

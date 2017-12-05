@@ -14,7 +14,7 @@
 				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2016.farma.Farma">
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
 					<properties />
 				</party>
 				<party
@@ -26,7 +26,7 @@
 					<properties />
 				</party>
 				<party
-					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Agent16C.class">
+					classPath="agents.anac.y2016.parscat.ParsCat">
 					<properties />
 				</party>
 			</partyRepItems>
@@ -40,8 +40,6 @@
 			<repetitionAllowed>false</repetitionAllowed>
 			<persistentDataType>DISABLED</persistentDataType>
 		</tournament>
-	</tournaments>
-		<tournaments>
 		<tournament>
 			<deadline>
 				<value>180</value>
@@ -55,7 +53,7 @@
 				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2016.farma.Farma">
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
 					<properties />
 				</party>
 				<party
@@ -67,7 +65,7 @@
 					<properties />
 				</party>
 				<party
-					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Agent16C.class">
+					classPath="agents.anac.y2016.parscat.ParsCat">
 					<properties />
 				</party>
 			</partyRepItems>
@@ -81,8 +79,6 @@
 			<repetitionAllowed>false</repetitionAllowed>
 			<persistentDataType>DISABLED</persistentDataType>
 		</tournament>
-	</tournaments>
-		<tournaments>
 		<tournament>
 			<deadline>
 				<value>180</value>
@@ -96,7 +92,7 @@
 				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2016.farma.Farma">
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
 					<properties />
 				</party>
 				<party
@@ -108,7 +104,7 @@
 					<properties />
 				</party>
 				<party
-					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Agent16C.class">
+					classPath="agents.anac.y2016.parscat.ParsCat">
 					<properties />
 				</party>
 			</partyRepItems>
@@ -116,6 +112,84 @@
 				<item url="file:etc/templates/ANAC2015/group2-politics/Politics_util1.xml"/>
                 		<item url="file:etc/templates/ANAC2015/group2-politics/Politics_util2.xml"/>
                 		<item url="file:etc/templates/ANAC2015/group2-politics/Politics_util3.xml"/>
+			</partyProfileItems>
+			<repeats>1</repeats>
+			<numberOfPartiesPerSession>3</numberOfPartiesPerSession>
+			<repetitionAllowed>false</repetitionAllowed>
+			<persistentDataType>DISABLED</persistentDataType>
+		</tournament>
+		<tournament>
+			<deadline>
+				<value>180</value>
+				<type>TIME</type>
+			</deadline>
+			<protocolItem hasMediatorProfile="false" hasMediator="false"
+				description="Each agents makes offer, counter-offer, or accepts"
+				classPath="negotiator.protocol.StackedAlternatingOffersProtocol"
+				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
+			<partyRepItems>
+				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
+					<properties />
+				</party>
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
+					<properties />
+				</party>
+				<party
+					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Don.class">
+					<properties />
+				</party>
+				<party
+					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Agent16A.class">
+					<properties />
+				</party>
+				<party
+					classPath="agents.anac.y2016.parscat.ParsCat">
+					<properties />
+				</party>
+			</partyRepItems>
+			<partyProfileItems>
+				<item url="file:etc/templates/ANAC2015/group5-car_domain/car-Profile4.xml"/>
+                		<item url="file:etc/templates/ANAC2015/group5-car_domain/car-Profile7.xml"/>
+                		<item url="file:etc/templates/ANAC2015/group5-car_domain/car-Profile9.xml"/>
+			</partyProfileItems>
+			<repeats>1</repeats>
+			<numberOfPartiesPerSession>3</numberOfPartiesPerSession>
+			<repetitionAllowed>false</repetitionAllowed>
+			<persistentDataType>DISABLED</persistentDataType>
+		</tournament>
+				<tournament>
+			<deadline>
+				<value>180</value>
+				<type>TIME</type>
+			</deadline>
+			<protocolItem hasMediatorProfile="false" hasMediator="false"
+				description="Each agents makes offer, counter-offer, or accepts"
+				classPath="negotiator.protocol.StackedAlternatingOffersProtocol"
+				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
+			<partyRepItems>
+				<party classPath="agents.anac.y2016.atlas3.Atlas32016">
+					<properties />
+				</party>
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
+					<properties />
+				</party>
+				<party
+					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Don.class">
+					<properties />
+				</party>
+				<party
+					classPath="/home/juillermo/eclipse-workspace/The_nego_people/bin/Agent16A.class">
+					<properties />
+				</party>
+				<party
+					classPath="agents.anac.y2016.parscat.ParsCat">
+					<properties />
+				</party>
+			</partyRepItems>
+			<partyProfileItems>
+				<item url="file:etc/templates/ANAC2016/Maxoops/WindFarm_util1.xml"/>
+                		<item url="file:etc/templates/ANAC2016/Maxoops/WindFarm_util2.xml"/>
+                		<item url="file:etc/templates/ANAC2016/Maxoops/WindFarm_util3.xml"/>
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>3</numberOfPartiesPerSession>
