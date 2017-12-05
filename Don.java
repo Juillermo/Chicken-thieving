@@ -14,7 +14,7 @@ import negotiator.boaframework.OpponentModel;
 
 import negotiator.actions.Accept;
 
-public class Thief1 extends AbstractNegotiationParty {
+public class Don extends AbstractNegotiationParty {
 
 	private final String description = "Observer Agent";
 	Bid lastReceivedOffer; // offer on the table
