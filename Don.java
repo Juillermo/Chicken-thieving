@@ -270,6 +270,7 @@ public class Don extends AbstractNegotiationParty {
 		double phase3at = 0.95;
 		double phase4at = 0.99;
 		double phase2at = 0.5;
+		
 		if (rem <= 1 && time > phase3at)
 			phase = 5;
 		else if ((time > phase4at || rem < 5) && backup != null)
