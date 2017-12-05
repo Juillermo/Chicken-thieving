@@ -44,9 +44,11 @@ public class OMrepo {
 	}
 
 	public OpponentModel[] getModels() {
+
 		OpponentModel[] models = { new AgentXFrequencyModel(), new CUHKFrequencyModelV2(), new AgentLGModel(),
 				new WindowedOpponentModel(), new NashFrequencyModel(), new SmithFrequencyModel(), new SmithFrequencyModelV2(),
 				 };// new WindowedFrequencyModelTryout(), };
+
 
 		for (int i = 0; i < models.length; i++) {
 			Map<String, Double> p = new HashMap<String, Double>();

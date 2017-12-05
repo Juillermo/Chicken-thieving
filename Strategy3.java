@@ -41,7 +41,7 @@ public class Strategy3 extends BiddingStrategy {
 		}
 		System.out.println("Don: Count : "+count);
 		count++;
-		System.out.println("Don: Count : "+count);
+
 		if (bids.size() != 0) {
 			if (count > bids.size())
 				count = 1;

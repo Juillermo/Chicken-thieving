@@ -8,7 +8,7 @@ clear
 genius_dir = '/home/juillermo/eclipse-workspace/The_nego_people/genius/';
 
 log_dir = [genius_dir 'log'];
-log_name = 'Log-Session_20171205-143728';
+log_name = 'Log-Session_20171205-145014';
 
 profiles_dir = {
     'etc/templates/ANAC2015/group1-university';
