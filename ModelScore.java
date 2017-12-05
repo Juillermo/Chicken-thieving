@@ -89,9 +89,11 @@ public class ModelScore {
 				bestOm = oms[i];
 			}
 		}
-		if (bestOm != lastBestOm)
+		if (bestOm != lastBestOm) {
 			modelChanges++;
-
+			lastBestOm = bestOm;
+		}
+		
 		return bestOm;
 	}
 
@@ -121,6 +123,7 @@ public class ModelScore {
 
 		}
 		System.out.println("Best model is " + bestOm.getName() + ", after " + modelChanges + " changes.");
+		System.out.println("Last model for computing Nash was " + lastBestOm.getName() + "");
 	}
 
 }

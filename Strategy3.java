@@ -6,19 +6,19 @@ import negotiator.AgentID;
 import negotiator.Bid;
 import negotiator.parties.NegotiationInfo;
 
-
 public class Strategy3 extends BiddingStrategy {
 
 	double count;
 	List<NashBidDetails> bids;
-    int domainSize;
-    Bid backup;
-	
-	public void init(NegotiationInfo info, ModelScore[] ms, AgentID[] agents, int domainSize, Bid backup, List<NashBidDetails> nashbids) {
+	int domainSize;
+	Bid backup;
+
+	public void init(NegotiationInfo info, ModelScore[] ms, AgentID[] agents, int domainSize, Bid backup,
+			List<NashBidDetails> nashbids) {
 		super.init(info, ms, agents, nashbids);
-	    count=0;
-	    this.domainSize=domainSize;
-	    this.backup=backup;
+		count = 0;
+		this.domainSize = domainSize;
+		this.backup = backup;
 	}
 
 	public Bid getBid(int rem) {
@@ -27,7 +27,7 @@ public class Strategy3 extends BiddingStrategy {
 			bids = new ArrayList<NashBidDetails>();
 
 			while (i < (Math.ceil(domainSize / 8))) {
-				if (backup!=null 	&& utilitySpace.getUtility(nashbids.get(i).getBid()) > utilitySpace.getUtility(backup))
+				if (backup != null && utilitySpace.getUtility(nashbids.get(i).getBid()) > utilitySpace.getUtility(backup))
 					bids.add(nashbids.get(i));
 
 				i++;
@@ -43,6 +43,4 @@ public class Strategy3 extends BiddingStrategy {
 		return bids.get(index).getBid();
 	}
 
-
-	
 }

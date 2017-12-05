@@ -236,14 +236,26 @@ public class Don extends AbstractNegotiationParty {
 
 	@Override
 	public java.util.HashMap<java.lang.String, java.lang.String> negotiationEnded(Bid acceptedBid) {
-		Bid nashBid = getNashBids(1).get(0).getBid();
+		try {
+			Bid nashBid = getNashBids(1).get(0).getBid();
+			
+			System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
+			ms[0].printState(nashBid);
+			ms[1].printState(nashBid);
 
-		System.out.println("Don: Our utility for Nash is " + getUtility(nashBid));
-		ms[0].printState(nashBid);
-		ms[1].printState(nashBid);
+			System.out.println("Don: There were " + finalRounds + " final rounds.");
+			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			Bid maxBid = getMaxUtilityBid();
+			
+			ms[0].printState(maxBid);
+			ms[1].printState(maxBid);
 
-		System.out.println("Don: There were " + finalRounds + " final rounds.");
-		System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+			System.out.println("Don: There were " + finalRounds + " final rounds.");
+			System.out.println("Don: There were " + nBackups + " backups that have been offered " + nBackupsOffered + " times.");
+		};
 
 		return null;
 	}
@@ -254,8 +266,9 @@ public class Don extends AbstractNegotiationParty {
 			phase3bids = new ArrayList<NashBidDetails>();
 
 			while (i < (Math.ceil(modelDomain.getSize() / 8))) {
-				if (backup != null
-						&& getUtility(nashbids.get(i).getBid()) > getUtility(backup))
+				if (backup != null && getUtility(nashbids.get(i).getBid()) > getUtility(backup))
+					phase3bids.add(nashbids.get(i));
+				else if (backup == null)
 					phase3bids.add(nashbids.get(i));
 
 				i++;
@@ -264,11 +277,15 @@ public class Don extends AbstractNegotiationParty {
 		}
 
 		phase3count++;
-		if (phase3count > phase3bids.size())
-			phase3count = 1;
-		int repeat = (int) Math.floor(rem / phase3bids.size());
-		int index = (int) Math.floor((phase3count - 1) / repeat);
-		return phase3bids.get(index).getBid();
+		if (phase3bids.size() != 0) {
+			if (phase3count > phase3bids.size())
+				phase3count = 1;
+			int repeat = (int) Math.floor(rem / phase3bids.size());
+			int index = (int) Math.floor((phase3count - 1) / repeat);
+			return phase3bids.get(index).getBid();
+		}else {
+			return getMaxUtilityBid();
+		}
 	}
 
 	public Bid phase2bid(double time) {
