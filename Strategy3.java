@@ -29,6 +29,8 @@ public class Strategy3 extends BiddingStrategy {
 			while (i < (Math.ceil(domainSize / 8))) {
 				if (backup != null && utilitySpace.getUtility(nashbids.get(i).getBid()) > utilitySpace.getUtility(backup))
 					bids.add(nashbids.get(i));
+				else if (backup == null)
+					bids.add(nashbids.get(i));
 
 				i++;
 			}
@@ -36,11 +38,15 @@ public class Strategy3 extends BiddingStrategy {
 		}
 
 		count++;
-		if (count > bids.size())
-			count = 1;
-		int repeat = (int) Math.floor(rem / bids.size());
-		int index = (int) Math.floor((count - 1) / repeat);
-		return bids.get(index).getBid();
+		if (phase3bids.size() != 0) {
+			if (count > bids.size())
+				count = 1;
+			int repeat = (int) Math.floor(rem / bids.size());
+			int index = (int) Math.floor((count - 1) / repeat);
+			return bids.get(index).getBid();
+		}else {
+			return utilitySpace.getMaxUtilityBid();
+		}
 	}
 
 }
