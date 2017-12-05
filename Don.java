@@ -323,7 +323,7 @@ public class Don extends AbstractNegotiationParty {
 			phase = 5;
 		else if ((time > phase4at || rem < 5) && backup != null)
 			phase = 4;
-		else if ((time > phase3at || rem < modelDomain.getSize()) && nashflag)
+		else if ((time > phase3at || rem < modelDomain.getSize()/8) && nashflag)
 			phase = 3;
 		else if (time > phase2at && ms[0].confident(100, 5)
 				&& ms[1].confident(100, 5))
